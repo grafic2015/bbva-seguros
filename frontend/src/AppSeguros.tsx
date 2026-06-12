@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Scene3D } from './components/Scene3D'
+import Scene3D from './components/Scene3D'
 import { LeadsTableNew } from './components/LeadsTableNew'
 import { LeadsForm } from './components/LeadsForm'
 import { CotizacionPanel } from './components/CotizacionPanel'
