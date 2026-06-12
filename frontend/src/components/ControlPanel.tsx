@@ -202,13 +202,13 @@ const styles: Record<string, React.CSSProperties> = {
   logo: { display: "flex", alignItems: "center", gap: 8 },
   dot:  { width: 8, height: 8, borderRadius: "50%", flexShrink: 0 },
   statsCard: {
-    background: "#161b22", border: "1px solid #30363d", borderRadius: 10, padding: "10px 12px",
+    background: "#161b22", border: "1px solid #30363d", borderRadius: 10, padding: "8px 10px",
   },
   statsTitle: { fontSize: 13, color: "#8b949e", marginBottom: 8, fontWeight: 600, textTransform: "uppercase" as const },
-  statsGrid: { display: "grid", gridTemplateColumns: "1fr 1fr 1fr 1fr", gap: 4 },
+  statsGrid: { display: "grid", gridTemplateColumns: "1fr 1fr 1fr 1fr", gap: 2 },
   statItem: { display: "flex", flexDirection: "column" as const, alignItems: "center" },
   statVal:  { fontSize: 24, fontWeight: 700 },
-  statLabel:{ fontSize: 11, color: "#6e7681", textTransform: "uppercase" as const },
+  statLabel:{ fontSize: 9, color: "#6e7681", textTransform: "uppercase" as const },
   progressTrack: { height: 4, background: "#21262d", borderRadius: 2, overflow: "hidden" },
   progressFill:  { height: "100%", borderRadius: 2, transition: "width 0.5s ease" },
   bigBtn: {
