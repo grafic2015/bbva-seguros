@@ -51,8 +51,8 @@ export function ConversacionPanel({ lead }: ConversacionPanelProps) {
   return (
     <div style={{ display: 'flex', flexDirection: 'column', height: '100%', background: '#161b22', borderRadius: '8px' }}>
       <div style={{ padding: '15px', borderBottom: '1px solid #30363d' }}>
-        <h3 style={{ margin: '0' }}>💬 Conversaciones</h3>
-        <p style={{ margin: '5px 0 0 0', fontSize: '12px', color: '#888' }}>
+        <h3 style={{ margin: '0', fontSize: '24px' }}>💬 Conversaciones</h3>
+        <p style={{ margin: '5px 0 0 0', fontSize: '16px', color: '#888' }}>
           {conversaciones.length} mensajes
         </p>
       </div>
@@ -85,7 +85,7 @@ export function ConversacionPanel({ lead }: ConversacionPanelProps) {
                   maxWidth: '85%'
                 }}
               >
-                <p style={{ margin: '0', fontSize: '14px', wordBreak: 'break-word' }}>
+                <p style={{ margin: '0', fontSize: '16px', wordBreak: 'break-word' }}>
                   {conv.mensaje_usuario}
                 </p>
                 <small style={{ color: '#888', marginTop: '5px' }}>
@@ -134,25 +134,27 @@ export function ConversacionPanel({ lead }: ConversacionPanelProps) {
           placeholder="Escribe un mensaje..."
           disabled={loading}
           style={{
-            padding: '10px',
+            padding: '12px',
             borderRadius: '4px',
             border: '1px solid #30363d',
             background: '#0d1117',
             color: 'white',
-            fontFamily: 'inherit'
+            fontFamily: 'inherit',
+            fontSize: '16px'
           }}
         />
         <button
           type="submit"
           disabled={loading || !mensaje.trim()}
           style={{
-            padding: '10px 20px',
+            padding: '12px 24px',
             background: loading || !mensaje.trim() ? '#555' : '#00cc00',
             color: 'white',
             border: 'none',
             borderRadius: '4px',
             cursor: loading || !mensaje.trim() ? 'not-allowed' : 'pointer',
-            fontWeight: 'bold'
+            fontWeight: 'bold',
+            fontSize: '16px'
           }}
         >
           {loading ? '⏳' : '📤'}
