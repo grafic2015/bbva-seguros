@@ -17,8 +17,8 @@ export default function AppSeguros() {
       {/* Panel izquierdo - Tabla y Formulario */}
       <div style={{ flex: 1, display: 'flex', flexDirection: 'column', borderRight: '1px solid #30363d', overflow: 'hidden' }}>
         <div style={{ padding: '30px', borderBottom: '1px solid #30363d', background: '#161b22' }}>
-          <h1 style={{ margin: '0', fontSize: '32px' }}>🚗 BBVA Seguros Auto</h1>
-          <p style={{ margin: '5px 0 0 0', fontSize: '18px', color: '#888' }}>Sistema de Gestión de Leads</p>
+          <h1 style={{ margin: '0', fontSize: '36px' }}>🚗 BBVA Seguros Auto</h1>
+          <p style={{ margin: '5px 0 0 0', fontSize: '20px', color: '#888' }}>Sistema de Gestión de Leads</p>
         </div>
 
         <div style={{ padding: '20px', overflow: 'auto', flex: 1 }}>
@@ -32,8 +32,8 @@ export default function AppSeguros() {
       {/* Panel central - Escena 3D */}
       <div style={{ flex: 1, display: 'flex', flexDirection: 'column', borderRight: '1px solid #30363d', overflow: 'hidden' }}>
         <div style={{ padding: '25px', borderBottom: '1px solid #30363d', background: '#161b22' }}>
-          <h2 style={{ margin: '0', fontSize: '24px' }}>🎮 Escena 3D</h2>
-          <p style={{ margin: '5px 0 0 0', fontSize: '16px', color: '#888' }}>
+          <h2 style={{ margin: '0', fontSize: '26px' }}>🎮 Escena 3D</h2>
+          <p style={{ margin: '5px 0 0 0', fontSize: '18px', color: '#888' }}>
             ⬆️⬇️⬅️➡️ Mover auto · 🖱️ Rotar cámara
           </p>
         </div>
@@ -50,13 +50,13 @@ export default function AppSeguros() {
               onClick={() => setActiveTab('tabla')}
               style={{
                 flex: 1,
-                padding: '8px',
+                padding: '10px',
                 background: activeTab === 'tabla' ? '#667EEA' : '#30363d',
                 color: 'white',
                 border: 'none',
                 borderRadius: '4px',
                 cursor: 'pointer',
-                fontSize: '18px',
+                fontSize: '20px',
                 fontWeight: 'bold'
               }}
             >
@@ -66,13 +66,13 @@ export default function AppSeguros() {
               onClick={() => setActiveTab('detalle')}
               style={{
                 flex: 1,
-                padding: '8px',
+                padding: '10px',
                 background: activeTab === 'detalle' ? '#667EEA' : '#30363d',
                 color: 'white',
                 border: 'none',
                 borderRadius: '4px',
                 cursor: 'pointer',
-                fontSize: '18px',
+                fontSize: '20px',
                 fontWeight: 'bold'
               }}
             >
@@ -81,11 +81,11 @@ export default function AppSeguros() {
           </div>
 
           {activeTab === 'detalle' && selectedLead && (
-            <div style={{ fontSize: '18px' }}>
+            <div style={{ fontSize: '20px' }}>
               <p style={{ margin: '0 0 5px 0', fontWeight: 'bold', color: '#667EEA' }}>
                 @{selectedLead.usuario_instagram}
               </p>
-              <p style={{ margin: '0', color: '#888', fontSize: '16px' }}>
+              <p style={{ margin: '0', color: '#888', fontSize: '18px' }}>
                 {selectedLead.nombre}
               </p>
             </div>

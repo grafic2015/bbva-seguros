@@ -25,13 +25,13 @@ export function ControlPanel() {
         <div style={styles.logo}>
           <span style={{ fontSize: 32 }}>🚗</span>
           <div>
-            <div style={{ fontSize: 24, fontWeight: 700, color: "#e6edf3" }}>Seguros BBVA</div>
-            <div style={{ fontSize: 16, color: "#8b949e" }}>Dashboard de Agentes</div>
+            <div style={{ fontSize: 28, fontWeight: 700, color: "#e6edf3" }}>Seguros BBVA</div>
+            <div style={{ fontSize: 18, color: "#8b949e" }}>Dashboard de Agentes</div>
           </div>
         </div>
         <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
           <span style={{ ...styles.dot, background: connected ? "#3fb950" : "#f85149" }} />
-          <span style={{ fontSize: 16, color: connected ? "#3fb950" : "#f85149" }}>
+          <span style={{ fontSize: 18, color: connected ? "#3fb950" : "#f85149" }}>
             {connected ? "En línea" : "Sin conexión"}
           </span>
         </div>
@@ -61,7 +61,7 @@ export function ControlPanel() {
         {/* Barra de progreso de conversión */}
         {stats.total > 0 && (
           <div style={{ marginTop: 8 }}>
-            <div style={{ display: "flex", justifyContent: "space-between", fontSize: 16, color: "#8b949e", marginBottom: 3 }}>
+            <div style={{ display: "flex", justifyContent: "space-between", fontSize: 18, color: "#8b949e", marginBottom: 3 }}>
               <span>Tasa de conversión</span>
               <span>{Math.round((stats.convertidos / stats.total) * 100)}%</span>
             </div>
@@ -86,7 +86,7 @@ export function ControlPanel() {
       </button>
 
       <div style={styles.divider} />
-      <div style={{ fontSize: 18, color: "#8b949e", textTransform: "uppercase", letterSpacing: 1 }}>
+      <div style={{ fontSize: 20, color: "#8b949e", textTransform: "uppercase", letterSpacing: 1 }}>
         Agentes Activos
       </div>
 
@@ -102,8 +102,8 @@ export function ControlPanel() {
             <div style={styles.agentHeader}>
               <span style={{ fontSize: 24 }}>{meta.emoji}</span>
               <div style={{ flex: 1, minWidth: 0 }}>
-                <div style={{ fontSize: 18, fontWeight: 700, color: meta.color }}>{meta.name}</div>
-                <div style={{ fontSize: 14, color: "#8b949e", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                <div style={{ fontSize: 20, fontWeight: 700, color: meta.color }}>{meta.name}</div>
+                <div style={{ fontSize: 15, color: "#8b949e", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
                   {meta.description}
                 </div>
               </div>
@@ -169,8 +169,8 @@ export function ControlPanel() {
 
       {/* Instrucciones de manejo */}
       <div style={styles.helpBox}>
-        <div style={{ fontSize: 11, color: "#8b949e", marginBottom: 4, fontWeight: 600 }}>🎮 Controles de autos</div>
-        <div style={{ fontSize: 10, color: "#6e7681", lineHeight: 1.6 }}>
+        <div style={{ fontSize: 14, color: "#8b949e", marginBottom: 4, fontWeight: 600 }}>🎮 Controles de autos</div>
+        <div style={{ fontSize: 12, color: "#6e7681", lineHeight: 1.6 }}>
           <div>🔴 Auto rojo: <kbd style={styles.kbd}>↑↓←→</kbd></div>
           <div>🔵 Auto azul: <kbd style={styles.kbd}>W A S D</kbd></div>
           <div style={{ marginTop: 4, color: "#58a6ff" }}>✨ Auto-piloto cuando no hay input</div>
@@ -204,17 +204,17 @@ const styles: Record<string, React.CSSProperties> = {
   statsCard: {
     background: "#161b22", border: "1px solid #30363d", borderRadius: 10, padding: "10px 12px",
   },
-  statsTitle: { fontSize: 11, color: "#8b949e", marginBottom: 8, fontWeight: 600, textTransform: "uppercase" as const },
+  statsTitle: { fontSize: 13, color: "#8b949e", marginBottom: 8, fontWeight: 600, textTransform: "uppercase" as const },
   statsGrid: { display: "grid", gridTemplateColumns: "1fr 1fr 1fr 1fr", gap: 4 },
   statItem: { display: "flex", flexDirection: "column" as const, alignItems: "center" },
-  statVal:  { fontSize: 18, fontWeight: 700 },
-  statLabel:{ fontSize: 9, color: "#6e7681", textTransform: "uppercase" as const },
+  statVal:  { fontSize: 28, fontWeight: 700 },
+  statLabel:{ fontSize: 11, color: "#6e7681", textTransform: "uppercase" as const },
   progressTrack: { height: 4, background: "#21262d", borderRadius: 2, overflow: "hidden" },
   progressFill:  { height: "100%", borderRadius: 2, transition: "width 0.5s ease" },
   bigBtn: {
     background: "linear-gradient(135deg, #e1306c, #833ab4)",
-    color: "white", border: "none", padding: "10px 8px",
-    borderRadius: 8, cursor: "pointer", fontWeight: 700, fontSize: 13,
+    color: "white", border: "none", padding: "12px 10px",
+    borderRadius: 8, cursor: "pointer", fontWeight: 700, fontSize: 16,
     boxShadow: "0 4px 12px #e1306c44",
     transition: "transform 0.1s, box-shadow 0.2s",
   },
@@ -225,22 +225,22 @@ const styles: Record<string, React.CSSProperties> = {
     transition: "border-color 0.3s",
   },
   agentHeader: { display: "flex", alignItems: "center", gap: 8 },
-  agentMsg: { fontSize: 11, color: "#8b949e", minHeight: 16 },
-  agentStat: { fontSize: 11, color: "#e6edf3" },
+  agentMsg: { fontSize: 13, color: "#8b949e", minHeight: 16 },
+  agentStat: { fontSize: 13, color: "#e6edf3" },
   logBox: {
     background: "#0d1117", borderRadius: 6, padding: "6px 8px",
     maxHeight: 64, overflow: "hidden",
   },
-  logLine: { fontSize: 10, color: "#6e7681", lineHeight: 1.5, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" as const },
+  logLine: { fontSize: 12, color: "#6e7681", lineHeight: 1.5, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" as const },
   badge: {
-    fontSize: 10, padding: "2px 8px", borderRadius: 10,
+    fontSize: 12, padding: "3px 10px", borderRadius: 10,
     fontWeight: 700, textTransform: "uppercase" as const, flexShrink: 0,
   },
   btnRow: { display: "flex", gap: 6, marginTop: 2 },
   btn: {
     flex: 1, color: "#e6edf3", border: "none",
-    padding: "7px 4px", borderRadius: 6,
-    fontSize: 11, fontWeight: 700,
+    padding: "9px 6px", borderRadius: 6,
+    fontSize: 13, fontWeight: 700,
     transition: "opacity 0.2s",
   },
   helpBox: {
@@ -249,6 +249,6 @@ const styles: Record<string, React.CSSProperties> = {
   },
   kbd: {
     background: "#21262d", border: "1px solid #30363d", borderRadius: 4,
-    padding: "1px 5px", fontSize: 10, color: "#e6edf3", fontFamily: "monospace",
+    padding: "2px 6px", fontSize: 12, color: "#e6edf3", fontFamily: "monospace",
   },
 };

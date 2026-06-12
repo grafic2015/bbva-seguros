@@ -67,7 +67,7 @@ export function LeadsForm() {
           cursor: 'pointer',
           fontWeight: 'bold',
           marginBottom: '15px',
-          fontSize: '18px'
+          fontSize: '20px'
         }}
       >
         {showForm ? '✕ Cerrar' : '+ Nuevo Lead'}
@@ -83,7 +83,7 @@ export function LeadsForm() {
               value={formData.nombre}
               onChange={handleChange}
               required
-              style={{ padding: '12px', borderRadius: '4px', border: '1px solid #30363d', background: '#0d1117', color: 'white', fontSize: '16px' }}
+              style={{ padding: '14px', borderRadius: '4px', border: '1px solid #30363d', background: '#0d1117', color: 'white', fontSize: '18px' }}
             />
             <input
               type="text"
@@ -92,7 +92,7 @@ export function LeadsForm() {
               value={formData.usuario_instagram}
               onChange={handleChange}
               required
-              style={{ padding: '12px', borderRadius: '4px', border: '1px solid #30363d', background: '#0d1117', color: 'white', fontSize: '16px' }}
+              style={{ padding: '14px', borderRadius: '4px', border: '1px solid #30363d', background: '#0d1117', color: 'white', fontSize: '18px' }}
             />
             <input
               type="email"
@@ -100,7 +100,7 @@ export function LeadsForm() {
               placeholder="Email"
               value={formData.email}
               onChange={handleChange}
-              style={{ padding: '12px', borderRadius: '4px', border: '1px solid #30363d', background: '#0d1117', color: 'white', fontSize: '16px' }}
+              style={{ padding: '14px', borderRadius: '4px', border: '1px solid #30363d', background: '#0d1117', color: 'white', fontSize: '18px' }}
             />
             <input
               type="tel"
@@ -108,7 +108,7 @@ export function LeadsForm() {
               placeholder="Teléfono"
               value={formData.telefono}
               onChange={handleChange}
-              style={{ padding: '12px', borderRadius: '4px', border: '1px solid #30363d', background: '#0d1117', color: 'white', fontSize: '16px' }}
+              style={{ padding: '14px', borderRadius: '4px', border: '1px solid #30363d', background: '#0d1117', color: 'white', fontSize: '18px' }}
             />
             <input
               type="text"
@@ -116,7 +116,7 @@ export function LeadsForm() {
               placeholder="Marca del auto"
               value={formData.marca}
               onChange={handleChange}
-              style={{ padding: '12px', borderRadius: '4px', border: '1px solid #30363d', background: '#0d1117', color: 'white', fontSize: '16px' }}
+              style={{ padding: '14px', borderRadius: '4px', border: '1px solid #30363d', background: '#0d1117', color: 'white', fontSize: '18px' }}
             />
             <input
               type="text"
@@ -124,7 +124,7 @@ export function LeadsForm() {
               placeholder="Modelo del auto"
               value={formData.modelo}
               onChange={handleChange}
-              style={{ padding: '12px', borderRadius: '4px', border: '1px solid #30363d', background: '#0d1117', color: 'white', fontSize: '16px' }}
+              style={{ padding: '14px', borderRadius: '4px', border: '1px solid #30363d', background: '#0d1117', color: 'white', fontSize: '18px' }}
             />
             <input
               type="number"
@@ -134,7 +134,7 @@ export function LeadsForm() {
               onChange={handleChange}
               min="1990"
               max={new Date().getFullYear()}
-              style={{ padding: '12px', borderRadius: '4px', border: '1px solid #30363d', background: '#0d1117', color: 'white', fontSize: '16px' }}
+              style={{ padding: '14px', borderRadius: '4px', border: '1px solid #30363d', background: '#0d1117', color: 'white', fontSize: '18px' }}
             />
             <input
               type="text"
@@ -142,7 +142,7 @@ export function LeadsForm() {
               placeholder="Localidad"
               value={formData.localidad}
               onChange={handleChange}
-              style={{ padding: '12px', borderRadius: '4px', border: '1px solid #30363d', background: '#0d1117', color: 'white', fontSize: '16px' }}
+              style={{ padding: '14px', borderRadius: '4px', border: '1px solid #30363d', background: '#0d1117', color: 'white', fontSize: '18px' }}
             />
           </div>
 
@@ -152,13 +152,14 @@ export function LeadsForm() {
             value={formData.comentario_inicial}
             onChange={handleChange}
             style={{
-              padding: '8px',
+              padding: '12px',
               borderRadius: '4px',
               border: '1px solid #30363d',
               background: '#0d1117',
               color: 'white',
-              minHeight: '80px',
-              fontFamily: 'inherit'
+              minHeight: '100px',
+              fontFamily: 'inherit',
+              fontSize: '18px'
             }}
           />
 
@@ -173,7 +174,7 @@ export function LeadsForm() {
               borderRadius: '6px',
               cursor: loading ? 'not-allowed' : 'pointer',
               fontWeight: 'bold',
-              fontSize: '16px'
+              fontSize: '18px'
             }}
           >
             {loading ? '⏳ Guardando...' : '✓ Crear Lead'}

@@ -55,7 +55,7 @@ export function CotizacionPanel({ lead }: CotizacionPanelProps) {
   return (
     <div style={{ padding: '20px', borderRadius: '8px', background: '#161b22' }}>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '15px' }}>
-        <h3 style={{ margin: '0', fontSize: '24px' }}>💰 Cotizaciones ({cotizaciones.length})</h3>
+        <h3 style={{ margin: '0', fontSize: '26px' }}>💰 Cotizaciones ({cotizaciones.length})</h3>
         {!showForm && (
           <button
             onClick={() => setShowForm(true)}
@@ -67,7 +67,7 @@ export function CotizacionPanel({ lead }: CotizacionPanelProps) {
               borderRadius: '4px',
               cursor: 'pointer',
               fontWeight: 'bold',
-              fontSize: '16px'
+              fontSize: '18px'
             }}
           >
             + Nueva
@@ -85,32 +85,32 @@ export function CotizacionPanel({ lead }: CotizacionPanelProps) {
             border: '1px solid #30363d'
           }}
         >
-          <p style={{ margin: '0 0 10px 0', fontSize: '18px', color: '#888' }}>
+          <p style={{ margin: '0 0 10px 0', fontSize: '20px', color: '#888' }}>
             📋 {lead.marca} {lead.modelo} {lead.año}
           </p>
           <div style={{ display: 'grid', gap: '10px' }}>
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
               <div>
-                <label style={{ fontSize: '16px', color: '#888' }}>Prima Mensual</label>
-                <p style={{ margin: '5px 0 0 0', fontSize: '18px', fontWeight: 'bold', color: '#00cc00' }}>
+                <label style={{ fontSize: '18px', color: '#888' }}>Prima Mensual</label>
+                <p style={{ margin: '5px 0 0 0', fontSize: '20px', fontWeight: 'bold', color: '#00cc00' }}>
                   $250
                 </p>
               </div>
               <div>
-                <label style={{ fontSize: '16px', color: '#888' }}>Prima Anual</label>
-                <p style={{ margin: '5px 0 0 0', fontSize: '18px', fontWeight: 'bold', color: '#00cc00' }}>
+                <label style={{ fontSize: '18px', color: '#888' }}>Prima Anual</label>
+                <p style={{ margin: '5px 0 0 0', fontSize: '20px', fontWeight: 'bold', color: '#00cc00' }}>
                   $3,000
                 </p>
               </div>
               <div>
-                <label style={{ fontSize: '16px', color: '#888' }}>Descuento</label>
-                <p style={{ margin: '5px 0 0 0', fontSize: '18px', fontWeight: 'bold', color: '#FFD700' }}>
+                <label style={{ fontSize: '18px', color: '#888' }}>Descuento</label>
+                <p style={{ margin: '5px 0 0 0', fontSize: '20px', fontWeight: 'bold', color: '#FFD700' }}>
                   35%
                 </p>
               </div>
               <div>
-                <label style={{ fontSize: '16px', color: '#888' }}>A pagar</label>
-                <p style={{ margin: '5px 0 0 0', fontSize: '18px', fontWeight: 'bold', color: '#87CEEB' }}>
+                <label style={{ fontSize: '18px', color: '#888' }}>A pagar</label>
+                <p style={{ margin: '5px 0 0 0', fontSize: '20px', fontWeight: 'bold', color: '#87CEEB' }}>
                   $162.50
                 </p>
               </div>
@@ -120,12 +120,14 @@ export function CotizacionPanel({ lead }: CotizacionPanelProps) {
               <button
                 onClick={() => setShowForm(false)}
                 style={{
-                  padding: '10px',
+                  padding: '12px',
                   background: '#555',
                   color: 'white',
                   border: 'none',
                   borderRadius: '4px',
-                  cursor: 'pointer'
+                  cursor: 'pointer',
+                  fontSize: '16px',
+                  fontWeight: 'bold'
                 }}
               >
                 Cancelar
@@ -134,13 +136,14 @@ export function CotizacionPanel({ lead }: CotizacionPanelProps) {
                 onClick={handleCrearCotizacion}
                 disabled={loading}
                 style={{
-                  padding: '10px',
+                  padding: '12px',
                   background: loading ? '#444' : '#00cc00',
                   color: 'white',
                   border: 'none',
                   borderRadius: '4px',
                   cursor: loading ? 'not-allowed' : 'pointer',
-                  fontWeight: 'bold'
+                  fontWeight: 'bold',
+                  fontSize: '16px'
                 }}
               >
                 {loading ? '⏳ Generando...' : '✓ Generar'}
@@ -166,29 +169,30 @@ export function CotizacionPanel({ lead }: CotizacionPanelProps) {
             >
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '15px' }}>
                 <div>
-                  <label style={{ fontSize: '16px', color: '#888' }}>Prima</label>
-                  <p style={{ margin: '5px 0 0 0', fontWeight: 'bold', color: '#00cc00' }}>
+                  <label style={{ fontSize: '18px', color: '#888' }}>Prima</label>
+                  <p style={{ margin: '5px 0 0 0', fontWeight: 'bold', color: '#00cc00', fontSize: '18px' }}>
                     ${cot.prima_mensual.toFixed(2)}/mes
                   </p>
                 </div>
                 <div>
-                  <label style={{ fontSize: '16px', color: '#888' }}>Descuento</label>
-                  <p style={{ margin: '5px 0 0 0', fontWeight: 'bold', color: '#FFD700' }}>
+                  <label style={{ fontSize: '18px', color: '#888' }}>Descuento</label>
+                  <p style={{ margin: '5px 0 0 0', fontWeight: 'bold', color: '#FFD700', fontSize: '18px' }}>
                     {cot.descuento_porcentaje}%
                   </p>
                 </div>
                 <div>
-                  <label style={{ fontSize: '16px', color: '#888' }}>Estado</label>
+                  <label style={{ fontSize: '18px', color: '#888' }}>Estado</label>
                   <p style={{
                     margin: '5px 0 0 0',
                     fontWeight: 'bold',
-                    color: cot.estado === 'aceptada' ? '#00cc00' : '#FFD700'
+                    color: cot.estado === 'aceptada' ? '#00cc00' : '#FFD700',
+                    fontSize: '18px'
                   }}>
                     {cot.estado}
                   </p>
                 </div>
               </div>
-              <p style={{ margin: '8px 0 0 0', fontSize: '12px', color: '#888' }}>
+              <p style={{ margin: '8px 0 0 0', fontSize: '14px', color: '#888' }}>
                 {new Date(cot.fecha_generacion).toLocaleDateString()}
               </p>
             </div>
