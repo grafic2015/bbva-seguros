@@ -1,12 +1,9 @@
 # ─── Secretos (NUNCA subir) ───────────────────────────────────
 .env
 
-# ─── Resultados y datos generados ─────────────────────────────
-results_jobs.json
-results_emails.json
-sent_history.json
-cv.pdf
-*.pdf
+# ─── Datos generados ──────────────────────────────────────────
+leads_instagram.json
+leads_export.csv
 
 # ─── Python ───────────────────────────────────────────────────
 __pycache__/

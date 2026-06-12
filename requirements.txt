@@ -28,3 +28,6 @@ alembic>=1.12.0
 # Validación
 pydantic>=2.0.0
 pydantic-settings>=2.0.0
+
+# Seguridad - Encriptación de credenciales
+cryptography>=41.0.0

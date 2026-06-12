@@ -9,7 +9,7 @@ from sqlalchemy.orm import sessionmaker
 import enum
 import os
 
-DATABASE_URL = os.getenv("DATABASE_URL", "postgresql://bbva_user:bbva_password_123@localhost:5432/bbva_seguros")
+DATABASE_URL = os.getenv("DATABASE_URL", "")
 
 engine = create_engine(DATABASE_URL)
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
