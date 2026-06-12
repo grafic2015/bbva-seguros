@@ -8,9 +8,9 @@ export function StatsPanel() {
   }
 
   const StatItem = ({ label, value, color }: { label: string; value: number | string; color: string }) => (
-    <div style={{ textAlign: 'center', padding: '15px', background: '#0d1117', borderRadius: '6px' }}>
-      <p style={{ margin: '0', fontSize: '12px', color: '#888' }}>{label}</p>
-      <p style={{ margin: '8px 0 0 0', fontSize: '24px', fontWeight: 'bold', color }}>
+    <div style={{ textAlign: 'center', padding: '20px', background: '#0d1117', borderRadius: '6px' }}>
+      <p style={{ margin: '0', fontSize: '18px', color: '#888' }}>{label}</p>
+      <p style={{ margin: '12px 0 0 0', fontSize: '48px', fontWeight: 'bold', color }}>
         {typeof value === 'number' && label.includes('%') ? value.toFixed(1) : value}
       </p>
     </div>

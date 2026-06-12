@@ -17,8 +17,8 @@ export default function AppSeguros() {
       {/* Panel izquierdo - Tabla y Formulario */}
       <div style={{ flex: 1, display: 'flex', flexDirection: 'column', borderRight: '1px solid #30363d', overflow: 'hidden' }}>
         <div style={{ padding: '20px', borderBottom: '1px solid #30363d', background: '#161b22' }}>
-          <h1 style={{ margin: '0', fontSize: '20px' }}>🚗 BBVA Seguros Auto</h1>
-          <p style={{ margin: '5px 0 0 0', fontSize: '12px', color: '#888' }}>Sistema de Gestión de Leads</p>
+          <h1 style={{ margin: '0', fontSize: '32px' }}>🚗 BBVA Seguros Auto</h1>
+          <p style={{ margin: '5px 0 0 0', fontSize: '18px', color: '#888' }}>Sistema de Gestión de Leads</p>
         </div>
 
         <div style={{ padding: '20px', overflow: 'auto', flex: 1 }}>
@@ -32,8 +32,8 @@ export default function AppSeguros() {
       {/* Panel central - Escena 3D */}
       <div style={{ flex: 1, display: 'flex', flexDirection: 'column', borderRight: '1px solid #30363d', overflow: 'hidden' }}>
         <div style={{ padding: '15px', borderBottom: '1px solid #30363d', background: '#161b22' }}>
-          <h2 style={{ margin: '0', fontSize: '16px' }}>🎮 Escena 3D</h2>
-          <p style={{ margin: '5px 0 0 0', fontSize: '11px', color: '#888' }}>
+          <h2 style={{ margin: '0', fontSize: '24px' }}>🎮 Escena 3D</h2>
+          <p style={{ margin: '5px 0 0 0', fontSize: '16px', color: '#888' }}>
             ⬆️⬇️⬅️➡️ Mover auto · 🖱️ Rotar cámara
           </p>
         </div>
