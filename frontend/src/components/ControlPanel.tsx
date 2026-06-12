@@ -23,15 +23,15 @@ export function ControlPanel() {
       {/* Header */}
       <div style={styles.header}>
         <div style={styles.logo}>
-          <span style={{ fontSize: 22 }}>🚗</span>
+          <span style={{ fontSize: 32 }}>🚗</span>
           <div>
-            <div style={{ fontSize: 13, fontWeight: 700, color: "#e6edf3" }}>Seguros BBVA</div>
-            <div style={{ fontSize: 10, color: "#8b949e" }}>Dashboard de Agentes</div>
+            <div style={{ fontSize: 24, fontWeight: 700, color: "#e6edf3" }}>Seguros BBVA</div>
+            <div style={{ fontSize: 16, color: "#8b949e" }}>Dashboard de Agentes</div>
           </div>
         </div>
         <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
           <span style={{ ...styles.dot, background: connected ? "#3fb950" : "#f85149" }} />
-          <span style={{ fontSize: 10, color: connected ? "#3fb950" : "#f85149" }}>
+          <span style={{ fontSize: 16, color: connected ? "#3fb950" : "#f85149" }}>
             {connected ? "En línea" : "Sin conexión"}
           </span>
         </div>
@@ -61,7 +61,7 @@ export function ControlPanel() {
         {/* Barra de progreso de conversión */}
         {stats.total > 0 && (
           <div style={{ marginTop: 8 }}>
-            <div style={{ display: "flex", justifyContent: "space-between", fontSize: 10, color: "#8b949e", marginBottom: 3 }}>
+            <div style={{ display: "flex", justifyContent: "space-between", fontSize: 16, color: "#8b949e", marginBottom: 3 }}>
               <span>Tasa de conversión</span>
               <span>{Math.round((stats.convertidos / stats.total) * 100)}%</span>
             </div>
@@ -86,7 +86,7 @@ export function ControlPanel() {
       </button>
 
       <div style={styles.divider} />
-      <div style={{ fontSize: 11, color: "#8b949e", textTransform: "uppercase", letterSpacing: 1 }}>
+      <div style={{ fontSize: 18, color: "#8b949e", textTransform: "uppercase", letterSpacing: 1 }}>
         Agentes Activos
       </div>
 
@@ -102,8 +102,8 @@ export function ControlPanel() {
             <div style={styles.agentHeader}>
               <span style={{ fontSize: 24 }}>{meta.emoji}</span>
               <div style={{ flex: 1, minWidth: 0 }}>
-                <div style={{ fontSize: 12, fontWeight: 700, color: meta.color }}>{meta.name}</div>
-                <div style={{ fontSize: 10, color: "#8b949e", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                <div style={{ fontSize: 18, fontWeight: 700, color: meta.color }}>{meta.name}</div>
+                <div style={{ fontSize: 14, color: "#8b949e", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
                   {meta.description}
                 </div>
               </div>
