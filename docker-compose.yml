@@ -1,0 +1,45 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:15-alpine
+    container_name: bbva_postgres
+    environment:
+      POSTGRES_USER: bbva_user
+      POSTGRES_PASSWORD: bbva_password_123
+      POSTGRES_DB: bbva_seguros
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - bbva_network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U bbva_user"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  backend:
+    build: .
+    container_name: bbva_backend
+    environment:
+      DATABASE_URL: postgresql://bbva_user:bbva_password_123@postgres:5432/bbva_seguros
+      OPENAI_API_KEY: ${OPENAI_API_KEY}
+      INSTAGRAM_EMAIL: ${INSTAGRAM_EMAIL}
+      INSTAGRAM_PASSWORD: ${INSTAGRAM_PASSWORD}
+    ports:
+      - "8000:8000"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - bbva_network
+    restart: always
+
+volumes:
+  postgres_data:
+
+networks:
+  bbva_network:
+    driver: bridge

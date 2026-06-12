@@ -1,0 +1,30 @@
+# Scraping
+requests>=2.31.0
+beautifulsoup4>=4.12.0
+playwright>=1.44.0
+
+# Servidor web local
+flask>=3.0.0
+
+# Opcional: leer CV para personalizar emails con Gemini
+PyPDF2>=3.0.0
+
+# Lector IMAP (detectar respuestas de empresas)
+imap-tools>=1.6.0
+
+# IA - OpenAI para respuestas automáticas
+openai>=1.0.0
+
+# Servidor FastAPI para Instagram
+fastapi>=0.100.0
+uvicorn>=0.24.0
+python-dotenv>=1.0.0
+
+# Base de datos
+sqlalchemy>=2.0.0
+psycopg2-binary>=2.9.0
+alembic>=1.12.0
+
+# Validación
+pydantic>=2.0.0
+pydantic-settings>=2.0.0

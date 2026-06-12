@@ -1,0 +1,334 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Resultados · Agentes de Empleo</title>
+<style>
+  :root {
+    --bg: #0d1117; --panel: #161b22; --panel2: #0d1117;
+    --border: #30363d; --border2: #21262d;
+    --text: #e6edf3; --muted: #8b949e; --dim: #6e7681;
+    --blue: #58a6ff; --green: #3fb950; --orange: #f0883e;
+    --red: #f85149; --yellow: #d29922; --purple: #a371f7;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    background: var(--bg); color: var(--text); min-height: 100vh;
+    background-image: radial-gradient(circle at 20% 0%, #1f6feb18, transparent 40%),
+                      radial-gradient(circle at 80% 10%, #3fb95012, transparent 40%);
+  }
+  .wrap { max-width: 1600px; margin: 0 auto; padding: 28px 22px 60px; }
+
+  header { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 14px; margin-bottom: 24px; }
+  .title { display: flex; align-items: center; gap: 12px; }
+  .title .logo { font-size: 30px; }
+  h1 { font-size: 22px; font-weight: 700; letter-spacing: -0.3px; }
+  .subtitle { color: var(--muted); font-size: 13px; margin-top: 2px; }
+
+  .actions { display: flex; align-items: center; gap: 10px; }
+  .dot { width: 9px; height: 9px; border-radius: 50%; display: inline-block; }
+  .conn { display: flex; align-items: center; gap: 7px; font-size: 12px; color: var(--muted);
+          background: var(--panel); border: 1px solid var(--border); padding: 7px 12px; border-radius: 20px; }
+  button.refresh {
+    background: #1f6feb; color: #fff; border: none; padding: 9px 16px; border-radius: 8px;
+    font-weight: 600; font-size: 13px; cursor: pointer; display: flex; align-items: center; gap: 7px;
+    transition: filter .15s;
+  }
+  button.refresh:hover { filter: brightness(1.12); }
+  .autobox { font-size: 12px; color: var(--muted); display: flex; align-items: center; gap: 6px; cursor: pointer; user-select: none; }
+
+  .cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 14px; margin-bottom: 26px; }
+  .card { background: var(--panel); border: 1px solid var(--border); border-radius: 12px; padding: 18px 20px; position: relative; overflow: hidden; }
+  .card .num { font-size: 30px; font-weight: 800; letter-spacing: -1px; }
+  .card .lbl { color: var(--muted); font-size: 12px; margin-top: 4px; text-transform: uppercase; letter-spacing: .4px; }
+  .card .bar { position: absolute; left: 0; top: 0; bottom: 0; width: 4px; }
+  .card.total .bar { background: var(--blue); }   .card.total .num { color: var(--blue); }
+  .card.mail .bar  { background: var(--green); }   .card.mail .num  { color: var(--green); }
+  .card.sent .bar  { background: var(--purple); }  .card.sent .num  { color: var(--purple); }
+  .card.pend .bar  { background: var(--yellow); }  .card.pend .num  { color: var(--yellow); }
+  .card.fail .bar  { background: var(--red); }     .card.fail .num  { color: var(--red); }
+  .card.open .bar  { background: var(--blue); }    .card.open .num  { color: var(--blue); }
+
+  .tablecard { background: var(--panel); border: 1px solid var(--border); border-radius: 12px; overflow: hidden; }
+  .tablehead { display: flex; align-items: center; justify-content: space-between; padding: 14px 18px; border-bottom: 1px solid var(--border); flex-wrap: wrap; gap: 10px; }
+  .tablehead h2 { font-size: 15px; }
+  .search { background: var(--panel2); border: 1px solid var(--border); color: var(--text);
+            padding: 7px 12px; border-radius: 8px; font-size: 13px; width: 200px; outline: none; }
+  .search:focus { border-color: var(--blue); }
+  .filters { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+  select, input[type=date] {
+    background: var(--panel2); border: 1px solid var(--border); color: var(--text);
+    padding: 7px 10px; border-radius: 8px; font-size: 13px; outline: none; cursor: pointer;
+    color-scheme: dark;
+  }
+  select:focus, input[type=date]:focus { border-color: var(--blue); }
+  .scroll { overflow-x: auto; }
+  table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  th { text-align: left; padding: 12px 14px; color: var(--muted); font-weight: 600; font-size: 11px;
+       text-transform: uppercase; letter-spacing: .4px; border-bottom: 1px solid var(--border); white-space: nowrap;
+       position: sticky; top: 0; background: var(--panel); }
+  td { padding: 12px 14px; border-bottom: 1px solid var(--border2); vertical-align: top; word-break: break-word; }
+  td.email-cell { max-width: 200px; word-break: break-all; font-size: 12px; }
+  td.title-cell { max-width: 180px; }
+  td.company-cell { max-width: 120px; }
+  tr:last-child td { border-bottom: none; }
+  tr:hover td { background: #1f6feb0a; }
+  .company { font-weight: 600; }
+  .src { font-size: 11px; padding: 3px 9px; border-radius: 6px; background: #1f6feb22; color: var(--blue); white-space: nowrap; }
+  a { color: var(--blue); text-decoration: none; }
+  a:hover { text-decoration: underline; }
+  a.mail { color: var(--green); font-weight: 600; }
+  a.aviso { color: var(--blue); font-size: 12px; white-space: nowrap; }
+  .nomail { color: var(--dim); }
+  .badge { font-size: 11px; padding: 3px 10px; border-radius: 12px; font-weight: 600; white-space: nowrap; }
+  .b-ok   { background: #3fb95022; color: var(--green); }
+  .b-skip { background: #8957e522; color: var(--purple); }
+  .b-pend { background: #d2992222; color: var(--yellow); }
+  .b-err  { background: #f8514922; color: var(--red); }
+  .b-none { background: var(--border); color: var(--muted); }
+  .dimtxt { color: var(--muted); }
+  .nowrap { white-space: nowrap; }
+
+  th { cursor: pointer; user-select: none; }
+  th:hover { color: var(--text); }
+  .sort-ic { font-size: 9px; margin-left: 3px; opacity: 0.4; }
+  .sort-ic.on { opacity: 1; color: var(--blue); }
+  .empty, .error { padding: 50px 20px; text-align: center; color: var(--muted); }
+  .error { color: var(--red); }
+  .updated { text-align: right; color: var(--dim); font-size: 11px; margin-top: 12px; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .spin { display: inline-block; animation: spin 1s linear infinite; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="title">
+      <span class="logo">📊</span>
+      <div>
+        <h1>Resultados de la búsqueda</h1>
+        <div class="subtitle">Empresas encontradas, correos y envíos de CV</div>
+      </div>
+    </div>
+    <div class="actions">
+      <span class="conn"><span class="dot" id="dot" style="background:#6e7681"></span><span id="connTxt">Conectando…</span></span>
+      <label class="autobox"><input type="checkbox" id="auto" checked /> Auto-actualizar</label>
+      <button class="refresh" id="refreshBtn"><span id="refIcon">⟳</span> Actualizar</button>
+    </div>
+  </header>
+
+
+  <div class="cards">
+    <div class="card total"><div class="bar"></div><div class="num" id="cTotal">0</div><div class="lbl">Ofertas</div></div>
+    <div class="card mail"><div class="bar"></div><div class="num" id="cMail">0</div><div class="lbl">Con correo</div></div>
+    <div class="card sent"><div class="bar"></div><div class="num" id="cSent">0</div><div class="lbl">CV enviados</div></div>
+    <div class="card pend"><div class="bar"></div><div class="num" id="cPend">0</div><div class="lbl">Pendientes</div></div>
+    <div class="card fail"><div class="bar"></div><div class="num" id="cFail">0</div><div class="lbl">Fallaron</div></div>
+    <div class="card open"><div class="bar"></div><div class="num" id="cOpen">0</div><div class="lbl">Abiertos</div></div>
+  </div>
+
+  <div class="tablecard">
+    <div class="tablehead">
+      <h2>Detalle</h2>
+      <div class="filters">
+        <select id="dateSel" title="Filtrar por fecha de envío">
+          <option value="all">📅 Todas las fechas</option>
+          <option value="today">Enviados hoy</option>
+          <option value="7d">Últimos 7 días</option>
+          <option value="30d">Últimos 30 días</option>
+        </select>
+        <input type="date" id="datePick" title="Día específico" />
+        <button class="refresh" id="clearDate" style="background:#21262d;border:1px solid var(--border);padding:7px 12px;" title="Limpiar fecha">✕</button>
+        <input class="search" id="search" placeholder="🔍 Empresa o correo…" />
+        <button class="refresh" id="exportCsvBtn" style="background:#1a472a;">⬇ CSV</button>
+        <button class="refresh" id="deleteAllBtn" style="background:var(--red);">🗑 Eliminar Todo</button>
+      </div>
+    </div>
+    <div class="scroll">
+      <table>
+        <thead>
+          <tr>
+            <th onclick="sortBy('search_date')">📅 Búsqueda <span class="sort-ic" id="si-search_date">⇅</span></th>
+            <th onclick="sortBy('search_keyword')">🔎 Palabras clave <span class="sort-ic" id="si-search_keyword">⇅</span></th>
+            <th onclick="sortBy('location')">📍 Zona <span class="sort-ic" id="si-location">⇅</span></th>
+            <th onclick="sortBy('company')">Empresa <span class="sort-ic" id="si-company">⇅</span></th>
+            <th onclick="sortBy('job_title')">Puesto <span class="sort-ic" id="si-job_title">⇅</span></th>
+            <th>Fuente</th><th>Aviso</th><th>Sitio web</th>
+            <th onclick="sortBy('email')">Correo <span class="sort-ic" id="si-email">⇅</span></th>
+            <th onclick="sortBy('sent')">Estado <span class="sort-ic" id="si-sent">⇅</span></th>
+            <th onclick="sortBy('sent_at')">Enviado <span class="sort-ic" id="si-sent_at">⇅</span></th>
+          </tr>
+        </thead>
+        <tbody id="tbody">
+          <tr><td colspan="8" class="empty">Cargando…</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+  <div class="updated" id="updated"></div>
+</div>
+
+<script>
+  // El backend (FastAPI) corre en el puerto 8000
+  const API = "http://localhost:8000/api/state";
+  let rows = [];
+  let sortKey = "";
+  let sortDir = 1;
+
+  const $ = (id) => document.getElementById(id);
+
+  function sortBy(key) {
+    if (sortKey === key) sortDir = -sortDir;
+    else { sortKey = key; sortDir = 1; }
+    ["search_date","search_keyword","location","company","job_title","email","sent","sent_at"].forEach(k => {
+      const el = $("si-" + k);
+      if (!el) return;
+      if (k === sortKey) { el.textContent = sortDir === 1 ? "▲" : "▼"; el.className = "sort-ic on"; }
+      else { el.textContent = "⇅"; el.className = "sort-ic"; }
+    });
+    render();
+  }
+
+  function exportCSV() {
+    const q = $("search").value.trim().toLowerCase();
+    const filt = rows.filter(r =>
+      (!q || (r.company||"").toLowerCase().includes(q) || (r.email||"").toLowerCase().includes(q))
+      && matchesDate(r)
+    );
+    if (!filt.length) { alert("No hay datos para exportar."); return; }
+    const cols = ["Fecha búsqueda","Palabras clave","Zona","Empresa","Puesto","Fuente","Aviso","Sitio web","Correo","Estado","Fecha envío"];
+    const statusTxt = r => r.skipped ? "Ya enviado" : r.sent ? "Enviado" : (r.sent===false&&r.sent_error) ? "Falló" : r.email ? "Pendiente" : "—";
+    const q2 = v => `"${String(v??"").replace(/"/g,'""')}"`;
+    const lines = filt.map(r => [r.search_date,r.search_keyword,r.location,r.company,r.job_title,r.source,r.apply_url,r.website,r.email,statusTxt(r),r.sent_at].map(q2).join(","));
+    const csv = [cols.join(","), ...lines].join("\n");
+    const blob = new Blob(["﻿"+csv], {type:"text/csv;charset=utf-8;"});
+    const a = document.createElement("a");
+    a.href = URL.createObjectURL(blob); a.download = "resultados_empleo.csv"; a.click();
+  }
+  const esc = (s) => String(s ?? "").replace(/[&<>"]/g, c => ({ "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;" }[c]));
+
+  function estado(r) {
+    if (r.skipped) return '<span class="badge b-skip">↷ Ya enviado</span>';
+    if (r.sent) return '<span class="badge b-ok">✓ Enviado</span>';
+    if (r.sent === false && r.sent_error) return '<span class="badge b-err">✗ Falló</span>';
+    if (r.email) return '<span class="badge b-pend">Pendiente</span>';
+    return '<span class="badge b-none">—</span>';
+  }
+  const dominio = (u) => String(u || "").replace(/^https?:\/\/(www\.)?/, "").replace(/\/$/, "");
+
+  // ¿La fila pasa el filtro de fecha (por fecha de envío sent_at)?
+  function matchesDate(r) {
+    const pick = $("datePick").value;          // "YYYY-MM-DD" o ""
+    const mode = $("dateSel").value;           // all | today | 7d | 30d
+    const d = (r.sent_at || "").slice(0, 10);  // "2026-06-02"
+
+    if (pick) return d === pick;               // día específico tiene prioridad
+    if (mode === "all") return true;
+    if (!d) return false;                       // sin fecha de envío → fuera de filtros de fecha
+    const today = new Date(); today.setHours(0, 0, 0, 0);
+    const rd = new Date(d + "T00:00:00");
+    const days = Math.floor((today - rd) / 86400000);
+    if (mode === "today") return days === 0;
+    if (mode === "7d")    return days >= 0 && days < 7;
+    if (mode === "30d")   return days >= 0 && days < 30;
+    return true;
+  }
+
+  function render() {
+    const q = $("search").value.trim().toLowerCase();
+    const filt = rows.filter(r =>
+      (!q || (r.company || "").toLowerCase().includes(q) || (r.email || "").toLowerCase().includes(q))
+      && matchesDate(r)
+    );
+    if (sortKey) {
+      filt.sort((a, b) => String(a[sortKey]??"").localeCompare(String(b[sortKey]??""), undefined, {numeric:true}) * sortDir);
+    }
+
+    // Las tarjetas reflejan el conjunto filtrado (coinciden con la tabla)
+    $("cTotal").textContent = filt.length;
+    $("cMail").textContent  = filt.filter(r => r.email).length;
+    $("cSent").textContent  = filt.filter(r => r.sent && !r.skipped).length;
+    $("cPend").textContent  = filt.filter(r => r.email && !r.sent && !r.sent_error).length;
+    $("cFail").textContent  = filt.filter(r => r.sent === false && r.sent_error).length;
+    $("cOpen").textContent  = filt.filter(r => r.opened).length;
+
+    const tb = $("tbody");
+    if (!filt.length) {
+      tb.innerHTML = `<tr><td colspan="11" class="empty">${rows.length ? "Sin coincidencias." : "Todavía no hay resultados. Ejecutá el Buscador desde la app."}</td></tr>`;
+      return;
+    }
+    tb.innerHTML = filt.map(r => {
+      const search_date = r.search_date ? new Date(r.search_date).toLocaleString('es-AR', {month: '2-digit', day: '2-digit', year: '2-digit', hour: '2-digit', minute: '2-digit'}) : "—";
+      const email_display = r.email ? `<a class="mail" href="mailto:${esc(r.email)}" title="${esc(r.email)}">${esc(r.email)}</a>` : '<span class="nomail">sin correo</span>';
+      return `
+      <tr>
+        <td class="dimtxt nowrap">${search_date}</td>
+        <td class="dimtxt">${esc(r.search_keyword) || "—"}</td>
+        <td class="dimtxt">${esc(r.location) || "—"}</td>
+        <td class="company-cell">${esc(r.company) || "—"}</td>
+        <td class="title-cell">${esc(r.job_title) || "—"}</td>
+        <td>${r.source ? `<span class="src">${esc(r.source)}</span>` : "—"}</td>
+        <td>${r.apply_url ? `<a href="${esc(r.apply_url)}" target="_blank" class="aviso">Ver aviso ↗</a>` : '<span class="nomail">—</span>'}</td>
+        <td>${r.website ? `<a href="${esc(r.website)}" target="_blank">${esc(dominio(r.website))}</a>` : "—"}</td>
+        <td class="email-cell">${email_display}</td>
+        <td>${estado(r)}</td>
+        <td class="dimtxt nowrap">${esc(r.sent_at) || "—"}</td>
+      </tr>`;
+    }).join("");
+  }
+
+  function setConn(ok) {
+    $("dot").style.background = ok ? "#3fb950" : "#f85149";
+    $("connTxt").textContent = ok ? "Conectado" : "Sin conexión (backend en puerto 8000)";
+  }
+
+  async function load() {
+    $("refIcon").className = "spin";
+    try {
+      const r = await fetch(API, { cache: "no-store" });
+      const data = await r.json();
+      rows = (data.emails && data.emails.length) ? data.emails : (data.jobs || []);
+      setConn(true);
+      render();
+      $("updated").textContent = "Última actualización: " + new Date().toLocaleTimeString();
+    } catch (e) {
+      setConn(false);
+      if (!rows.length) {
+        $("tbody").innerHTML = `<tr><td colspan="11" class="error">No se pudo conectar al backend.<br>
+          Asegurate de tener corriendo <b>run.bat</b> (servidor FastAPI en puerto 8000).</td></tr>`;
+      }
+    } finally {
+      $("refIcon").className = "";
+    }
+  }
+
+$("exportCsvBtn").addEventListener("click", exportCSV);
+  $("refreshBtn").addEventListener("click", load);
+  $("search").addEventListener("input", render);
+  $("dateSel").addEventListener("change", () => { $("datePick").value = ""; render(); });
+  $("datePick").addEventListener("change", render);
+  $("clearDate").addEventListener("click", () => {
+    $("datePick").value = ""; $("dateSel").value = "all"; render();
+  });
+  $("deleteAllBtn").addEventListener("click", async () => {
+    if (!confirm("¿Seguro que querés eliminar todos los resultados? Esto no se puede deshacer.")) return;
+    $("deleteAllBtn").disabled = true;
+    try {
+      // Eliminar los archivos JSON locales
+      const dirs = ["results_jobs.json", "results_emails.json"];
+      alert("Por favor, borra manualmente los archivos: " + dirs.join(", "));
+      rows = [];
+      render();
+    } catch (e) {
+      alert("Error: " + e.message);
+    } finally {
+      $("deleteAllBtn").disabled = false;
+    }
+  });
+  setInterval(() => { if ($("auto").checked) load(); }, 4000);
+  load();
+</script>
+</body>
+</html>

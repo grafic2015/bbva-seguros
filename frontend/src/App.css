@@ -1,0 +1,20 @@
+.app-container {
+  width: 100vw;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.top-section {
+  display: flex;
+  flex: 1;
+  gap: 0;
+}
+
+.bottom-section {
+  height: 280px;
+  background: linear-gradient(135deg, #1a2847 0%, #0f172a 100%);
+  border-top: 2px solid #667eea;
+  overflow: hidden;
+  box-shadow: 0 -10px 30px rgba(0,0,0,0.5);
+}
