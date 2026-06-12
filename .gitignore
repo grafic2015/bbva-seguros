@@ -1,5 +1,8 @@
 # ─── Secretos (NUNCA subir) ───────────────────────────────────
 .env
+settings.json
+.env.local
+settings.local.json
 
 # ─── Datos generados ──────────────────────────────────────────
 leads_instagram.json
