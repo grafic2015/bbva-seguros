@@ -51,8 +51,8 @@ export function ConversacionPanel({ lead }: ConversacionPanelProps) {
   return (
     <div style={{ display: 'flex', flexDirection: 'column', height: '100%', background: '#161b22', borderRadius: '8px' }}>
       <div style={{ padding: '15px', borderBottom: '1px solid #30363d' }}>
-        <h3 style={{ margin: '0', fontSize: '26px' }}>💬 Conversaciones</h3>
-        <p style={{ margin: '5px 0 0 0', fontSize: '18px', color: '#888' }}>
+        <h3 style={{ margin: '0', fontSize: '24px' }}>💬 Conversaciones</h3>
+        <p style={{ margin: '5px 0 0 0', fontSize: '16px', color: '#888' }}>
           {conversaciones.length} mensajes
         </p>
       </div>

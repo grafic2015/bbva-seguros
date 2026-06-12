@@ -67,7 +67,7 @@ export function LeadsForm() {
           cursor: 'pointer',
           fontWeight: 'bold',
           marginBottom: '15px',
-          fontSize: '20px'
+          fontSize: '18px'
         }}
       >
         {showForm ? '✕ Cerrar' : '+ Nuevo Lead'}

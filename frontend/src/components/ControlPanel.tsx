@@ -25,8 +25,8 @@ export function ControlPanel() {
         <div style={styles.logo}>
           <span style={{ fontSize: 32 }}>🚗</span>
           <div>
-            <div style={{ fontSize: 28, fontWeight: 700, color: "#e6edf3" }}>Seguros BBVA</div>
-            <div style={{ fontSize: 18, color: "#8b949e" }}>Dashboard de Agentes</div>
+            <div style={{ fontSize: 26, fontWeight: 700, color: "#e6edf3" }}>Seguros BBVA</div>
+            <div style={{ fontSize: 16, color: "#8b949e" }}>Dashboard de Agentes</div>
           </div>
         </div>
         <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
@@ -86,7 +86,7 @@ export function ControlPanel() {
       </button>
 
       <div style={styles.divider} />
-      <div style={{ fontSize: 20, color: "#8b949e", textTransform: "uppercase", letterSpacing: 1 }}>
+      <div style={{ fontSize: 18, color: "#8b949e", textTransform: "uppercase", letterSpacing: 1 }}>
         Agentes Activos
       </div>
 
@@ -102,8 +102,8 @@ export function ControlPanel() {
             <div style={styles.agentHeader}>
               <span style={{ fontSize: 24 }}>{meta.emoji}</span>
               <div style={{ flex: 1, minWidth: 0 }}>
-                <div style={{ fontSize: 20, fontWeight: 700, color: meta.color }}>{meta.name}</div>
-                <div style={{ fontSize: 15, color: "#8b949e", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                <div style={{ fontSize: 18, fontWeight: 700, color: meta.color }}>{meta.name}</div>
+                <div style={{ fontSize: 14, color: "#8b949e", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
                   {meta.description}
                 </div>
               </div>
@@ -207,7 +207,7 @@ const styles: Record<string, React.CSSProperties> = {
   statsTitle: { fontSize: 13, color: "#8b949e", marginBottom: 8, fontWeight: 600, textTransform: "uppercase" as const },
   statsGrid: { display: "grid", gridTemplateColumns: "1fr 1fr 1fr 1fr", gap: 4 },
   statItem: { display: "flex", flexDirection: "column" as const, alignItems: "center" },
-  statVal:  { fontSize: 28, fontWeight: 700 },
+  statVal:  { fontSize: 24, fontWeight: 700 },
   statLabel:{ fontSize: 11, color: "#6e7681", textTransform: "uppercase" as const },
   progressTrack: { height: 4, background: "#21262d", borderRadius: 2, overflow: "hidden" },
   progressFill:  { height: "100%", borderRadius: 2, transition: "width 0.5s ease" },

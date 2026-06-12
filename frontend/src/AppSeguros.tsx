@@ -43,7 +43,7 @@ export default function AppSeguros() {
       </div>
 
       {/* Panel derecho - Detalles y Cotizaciones */}
-      <div style={{ width: '400px', display: 'flex', flexDirection: 'column', borderLeft: '1px solid #30363d', overflow: 'hidden' }}>
+      <div style={{ width: '340px', display: 'flex', flexDirection: 'column', borderLeft: '1px solid #30363d', overflow: 'hidden' }}>
         <div style={{ padding: '30px', borderBottom: '1px solid #30363d', background: '#161b22' }}>
           <div style={{ display: 'flex', gap: '10px', marginBottom: '15px' }}>
             <button
@@ -56,7 +56,7 @@ export default function AppSeguros() {
                 border: 'none',
                 borderRadius: '4px',
                 cursor: 'pointer',
-                fontSize: '20px',
+                fontSize: '18px',
                 fontWeight: 'bold'
               }}
             >
@@ -72,7 +72,7 @@ export default function AppSeguros() {
                 border: 'none',
                 borderRadius: '4px',
                 cursor: 'pointer',
-                fontSize: '20px',
+                fontSize: '18px',
                 fontWeight: 'bold'
               }}
             >
@@ -81,11 +81,11 @@ export default function AppSeguros() {
           </div>
 
           {activeTab === 'detalle' && selectedLead && (
-            <div style={{ fontSize: '20px' }}>
+            <div style={{ fontSize: '18px' }}>
               <p style={{ margin: '0 0 5px 0', fontWeight: 'bold', color: '#667EEA' }}>
                 @{selectedLead.usuario_instagram}
               </p>
-              <p style={{ margin: '0', color: '#888', fontSize: '18px' }}>
+              <p style={{ margin: '0', color: '#888', fontSize: '16px' }}>
                 {selectedLead.nombre}
               </p>
             </div>

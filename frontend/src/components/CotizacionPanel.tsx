@@ -55,7 +55,7 @@ export function CotizacionPanel({ lead }: CotizacionPanelProps) {
   return (
     <div style={{ padding: '20px', borderRadius: '8px', background: '#161b22' }}>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '15px' }}>
-        <h3 style={{ margin: '0', fontSize: '26px' }}>💰 Cotizaciones ({cotizaciones.length})</h3>
+        <h3 style={{ margin: '0', fontSize: '24px' }}>💰 Cotizaciones ({cotizaciones.length})</h3>
         {!showForm && (
           <button
             onClick={() => setShowForm(true)}
@@ -67,7 +67,7 @@ export function CotizacionPanel({ lead }: CotizacionPanelProps) {
               borderRadius: '4px',
               cursor: 'pointer',
               fontWeight: 'bold',
-              fontSize: '18px'
+              fontSize: '16px'
             }}
           >
             + Nueva
