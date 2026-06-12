@@ -6,7 +6,10 @@
       "PowerShell(Get-ChildItem -Path \"C:\\\\Proyectos\\\\Seguros BBVA\" -Force | Where-Object { $_.Name -ne \".claude\" } | Select-Object Name, @{Name=\"Type\";Expression={if\\($_.PSIsContainer\\){\"📁\"}else{\"📄\"}}} | Format-Table -AutoSize)",
       "Bash(git filter-branch *)",
       "Bash(git reset *)",
-      "Bash(git push *)"
+      "Bash(git push *)",
+      "Bash(Remove-Item vercel.json -Force)",
+      "Bash(git add *)",
+      "Bash(git commit *)"
     ]
   }
 }
