@@ -19,13 +19,15 @@ app = FastAPI(
     version="1.0.0"
 )
 
-# CORS
+# CORS - Agregar PRIMERO, antes de los routers
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
+    expose_headers=["*"],
+    max_age=600,
 )
 
 # ═══════════════════════════════════════════════════════════════════════════
