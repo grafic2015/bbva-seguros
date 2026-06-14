@@ -39,7 +39,8 @@ export type WSEvent =
   | { type: "snapshot"; agents: AgentsState }
   | { type: "agent_state"; agent: AgentId; state: AgentState }
   | { type: "agent_log"; agent: AgentId; line: string }
-  | { type: "results"; leads: Lead[] };
+  | { type: "results"; leads: Lead[] }
+  | { type: "ping" };
 
 export const AGENT_META: Record<AgentId, { name: string; color: string; emoji: string; description: string }> = {
   instagram: { name: "Instagram Monitor", color: "#e1306c", emoji: "📸", description: "Monitorea comentarios y envía DMs automáticos" },

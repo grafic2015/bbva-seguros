@@ -64,16 +64,21 @@ export function useAgentSocket() {
             }
           }
 
+          // Ignorar pings del servidor
+          if (event.type === "ping") return;
           applyEvent(event);
         } catch {}
       };
       ws.onclose = () => {
         setConnected(false);
         if (stopped) return;
+        // Backoff progresivo: 1s, 2s, 4s, 8s, max 16s
+        const delay = Math.min(1000 * Math.pow(2, retry), 16000);
         retry = Math.min(retry + 1, 5);
-        setTimeout(connect, 500 * retry);
+        setTimeout(connect, delay);
       };
-      ws.onerror = () => ws?.close();
+      // No hacer nada en onerror para evitar spam en consola
+      ws.onerror = () => { ws?.close(); };
     };
 
     connect();
@@ -81,7 +86,8 @@ export function useAgentSocket() {
       stopped = true;
       ws?.close();
     };
-  }, [applyEvent, setConnected, setLeads]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 }
 
 export async function startAgent(agent: string) {
