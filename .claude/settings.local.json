@@ -9,7 +9,9 @@
       "Bash(git push *)",
       "Bash(Remove-Item vercel.json -Force)",
       "Bash(git add *)",
-      "Bash(git commit *)"
+      "Bash(git commit *)",
+      "Bash(git cherry-pick *)",
+      "PowerShell(Get-ChildItem -Path \"C:\\\\Proyectos\\\\Seguros BBVA\" -Depth 1 | Select-Object Name, @{Name=\"Type\";Expression={if\\($_.PSIsContainer\\){\"Dir\"}else{\"File\"}}} | Format-Table -AutoSize)"
     ]
   }
 }

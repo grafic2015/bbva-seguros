@@ -12,31 +12,36 @@ help:
 	@echo "╚════════════════════════════════════════════════════════════╝"
 	@echo ""
 	@echo "📦 Instalación:"
-	@echo "  make install          - Instalar dependencias"
-	@echo "  make install-dev      - Instalar con dependencias de desarrollo"
+	@echo "  make install          - Instalar dependencias Python"
+	@echo "  make install-dev      - + dependencias de desarrollo"
 	@echo ""
 	@echo "🚀 Desarrollo:"
-	@echo "  make dev              - Levantar stack local (Docker Compose)"
+	@echo "  make dev              - Levantar con Supabase (recomendado)"
+	@echo "  make dev-local        - Levantar con PostgreSQL local"
 	@echo "  make logs             - Ver logs en tiempo real"
-	@echo "  make shell            - Shell interactivo en container"
+	@echo "  make shell            - Shell en container"
 	@echo "  make test             - Ejecutar tests"
-	@echo "  make lint             - Chequear código (flake8)"
+	@echo "  make lint             - Validar código"
+	@echo ""
+	@echo "🗄️  Base de Datos:"
+	@echo "  make psql             - Conectar a DB"
+	@echo "  make migrate          - Ejecutar migraciones"
 	@echo ""
 	@echo "🐳 Docker:"
-	@echo "  make build            - Compilar imagen Docker"
-	@echo "  make push             - Push a Oracle Container Registry"
+	@echo "  make build            - Compilar imagen"
 	@echo "  make clean            - Limpiar contenedores"
 	@echo ""
 	@echo "☁️  Oracle Cloud:"
-	@echo "  make secrets          - Generar secretos para .env"
-	@echo "  make ocir             - Build y push a OCIR"
+	@echo "  make secrets          - Generar secretos"
+	@echo "  make ocir             - Build + push a OCIR"
 	@echo "  make deploy           - Deploy a Container Instance"
 	@echo "  make deploy-tf        - Deploy con Terraform"
 	@echo ""
 	@echo "🔧 Utilidades:"
-	@echo "  make migrate          - Ejecutar migraciones de DB"
-	@echo "  make psql             - Conectar a PostgreSQL"
-	@echo "  make healthcheck      - Verificar salud de la app"
+	@echo "  make healthcheck      - Verificar app"
+	@echo "  make start            - Alias de 'make dev'"
+	@echo "  make stop             - Parar contenedores"
+	@echo "  make ps               - Ver contenedores activos"
 	@echo ""
 
 # ─────────────────────────────────────────────────────────────────────────
@@ -55,18 +60,30 @@ install-dev: install
 # ─────────────────────────────────────────────────────────────────────────
 
 dev:
-	@echo "🚀 Levantando stack local..."
+	@echo "🚀 Levantando backend con Supabase..."
 	@if [ ! -f .env ]; then \
 		echo "⚠️  Creando .env desde .env.example..."; \
 		cp .env.example .env; \
 		echo "✅ Archivo .env creado"; \
-		echo "⚠️  Edita .env con tus credenciales"; \
+		echo "⚠️  Edita .env con DATABASE_URL de Supabase"; \
+		echo "📖 Guía: SUPABASE_SETUP.md"; \
 	fi
-	docker-compose up -d
-	@echo "✅ Stack levantado"
+	docker-compose up -d backend
+	@echo "✅ Stack levantado (Supabase)"
 	@echo "🌐 Frontend: http://localhost:5173"
 	@echo "🔌 Backend:  http://localhost:8000"
 	@echo "📊 Docs:     http://localhost:8000/docs"
+
+dev-local:
+	@echo "🚀 Levantando backend + PostgreSQL local..."
+	@if [ ! -f .env ]; then \
+		echo "⚠️  Creando .env desde .env.example..."; \
+		cp .env.example .env; \
+	fi
+	docker-compose --profile local up -d
+	@echo "✅ Stack levantado (PostgreSQL local)"
+	@echo "🗄️  PostgreSQL: localhost:5432"
+	@echo "🔌 Backend:   http://localhost:8000"
 
 logs:
 	docker-compose logs -f backend

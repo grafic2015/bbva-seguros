@@ -1,13 +1,30 @@
 version: '3.8'
 
+# ═════════════════════════════════════════════════════════════════════════
+# BBVA Seguros - Docker Compose
+#
+# 📌 Modos de uso:
+#
+# 1. CON SUPABASE (producción):
+#    docker-compose up -d backend
+#    (PostgreSQL no necesario, usa DATABASE_URL de Supabase)
+#
+# 2. CON POSTGRES LOCAL (desarrollo sin conexión internet):
+#    docker-compose up -d
+#    (Levanta postgres + backend)
+# ═════════════════════════════════════════════════════════════════════════
+
 services:
+  # ─────────────────────────────────────────────────────────────────────
+  # PostgreSQL Local (OPCIONAL - solo si no usas Supabase)
+  # ─────────────────────────────────────────────────────────────────────
   postgres:
     image: postgres:15-alpine
     container_name: bbva_postgres
     environment:
-      POSTGRES_USER: ${POSTGRES_USER}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
-      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: bbva_seguros
     ports:
       - "5432:5432"
     volumes:
@@ -15,11 +32,13 @@ services:
     networks:
       - bbva_network
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER}"]
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
       interval: 10s
       timeout: 5s
       retries: 5
     restart: unless-stopped
+    profiles:
+      - local  # Usar: docker-compose --profile local up
 
   backend:
     build:
@@ -27,22 +46,26 @@ services:
       dockerfile: Dockerfile
     container_name: bbva_backend
     environment:
-      # Base de datos
+      # 🗄️  BASE DE DATOS
+      # Supabase: DATABASE_URL=postgresql://postgres.xxxx:pass@pooler.supabase.com:6543/postgres
+      # Local:    DATABASE_URL=postgresql://postgres:postgres@postgres:5432/bbva_seguros
       DATABASE_URL: ${DATABASE_URL}
-      POSTGRES_USER: ${POSTGRES_USER}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
-      POSTGRES_DB: ${POSTGRES_DB}
 
-      # API Keys
+      # Supabase (opcional)
+      SUPABASE_URL: ${SUPABASE_URL:-}
+      SUPABASE_ANON_KEY: ${SUPABASE_ANON_KEY:-}
+      SUPABASE_SERVICE_ROLE_KEY: ${SUPABASE_SERVICE_ROLE_KEY:-}
+
+      # 🔑 API Keys
       OPENAI_API_KEY: ${OPENAI_API_KEY}
       OPENAI_MODEL: ${OPENAI_MODEL}
 
-      # Instagram
+      # 📱 Instagram
       INSTAGRAM_EMAIL: ${INSTAGRAM_EMAIL}
       INSTAGRAM_PASSWORD: ${INSTAGRAM_PASSWORD}
       INSTAGRAM_ACCOUNTS: ${INSTAGRAM_ACCOUNTS}
 
-      # Servidor
+      # 🌐 Servidor
       HOST: ${HOST}
       PORT: ${PORT}
       ENVIRONMENT: ${ENVIRONMENT}
@@ -51,13 +74,13 @@ services:
       SECRET_KEY: ${SECRET_KEY}
       CORS_ORIGINS: ${CORS_ORIGINS}
 
-      # Uvicorn
+      # 🚀 Uvicorn
       UVICORN_WORKERS: ${UVICORN_WORKERS}
+
     ports:
       - "${PORT}:${PORT}"
     depends_on:
-      postgres:
-        condition: service_healthy
+      - postgres
     networks:
       - bbva_network
     restart: unless-stopped

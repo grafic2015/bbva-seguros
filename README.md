@@ -22,17 +22,31 @@ Seguros BBVA/
 
 ## 🚀 Instalación
 
+### ⚡ Quick Start (5 minutos)
+
 ```bash
 # 1. Instalar dependencias
 pip install -r requirements.txt
 
-# 2. Verificar que .env esté configurado correctamente
-cat .env
+# 2. Crear .env
+cp .env.example .env
 
-# Debe contener:
-# INSTAGRAM_EMAIL=ayudanexos@gmail.com
-# INSTAGRAM_PASSWORD=Maranata26@
+# 3. Configurar Supabase (ver SUPABASE_SETUP.md)
+# - Crear proyecto en app.supabase.com
+# - Copiar DATABASE_URL a .env
+# - Copiar API keys a .env
+
+# 4. Levantar backend
+make dev
+
+# 5. API lista en http://localhost:8000
 ```
+
+### 📚 Documentación Completa
+
+- **[SUPABASE_SETUP.md](SUPABASE_SETUP.md)** - Configurar base de datos (5 min)
+- **[DEPLOY.md](DEPLOY.md)** - Deploy a producción (Oracle Cloud)
+- **Makefile** - Comandos útiles: `make help`
 
 ## 📱 Cómo funciona
 
