@@ -1,96 +1,21 @@
-# ═════════════════════════════════════════════════════════════════════════
-# BBVA Seguros - Docker Compose
-#
-# 📌 Modos de uso:
-#
-# 1. CON SUPABASE (producción) - solo levanta el backend:
-#    docker compose up -d backend
-#
-# 2. CON POSTGRES LOCAL (desarrollo sin internet):
-#    docker compose --profile local up -d
-#    (Levanta postgres + backend)
-# ═════════════════════════════════════════════════════════════════════════
-
 services:
-  # ─────────────────────────────────────────────────────────────────────
-  # PostgreSQL Local (OPCIONAL - solo si no usas Supabase)
-  # ─────────────────────────────────────────────────────────────────────
-  postgres:
-    image: postgres:15-alpine
-    container_name: bbva_postgres
-    environment:
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: postgres
-      POSTGRES_DB: bbva_seguros
-    ports:
-      - "5432:5432"
-    volumes:
-      - postgres_data:/var/lib/postgresql/data
-    networks:
-      - bbva_network
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U postgres"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
-    restart: unless-stopped
-    profiles:
-      - local  # Usar: docker compose --profile local up -d
-
   backend:
     build:
       context: .
       dockerfile: Dockerfile
     container_name: bbva_backend
     environment:
-      # 🗄️  BASE DE DATOS
-      # Supabase: DATABASE_URL=postgresql://postgres.xxxx:pass@pooler.supabase.com:6543/postgres
-      # Local:    DATABASE_URL=postgresql://postgres:postgres@postgres:5432/bbva_seguros
-      DATABASE_URL: ${DATABASE_URL:-}
-
-      # Supabase (opcional)
-      SUPABASE_URL: ${SUPABASE_URL:-}
-      SUPABASE_ANON_KEY: ${SUPABASE_ANON_KEY:-}
-      SUPABASE_SERVICE_ROLE_KEY: ${SUPABASE_SERVICE_ROLE_KEY:-}
-
-      # 🤖 Groq IA
-      GROQ_API_KEY: ${GROQ_API_KEY:-}
-      GROQ_MODEL: ${GROQ_MODEL:-llama3-70b-8192}
-
-      # 📱 Instagram
-      INSTAGRAM_EMAIL: ${INSTAGRAM_EMAIL:-}
-      INSTAGRAM_PASSWORD: ${INSTAGRAM_PASSWORD:-}
-      INSTAGRAM_ACCOUNTS: ${INSTAGRAM_ACCOUNTS:-}
-
-      # 🌐 Servidor
-      HOST: ${HOST:-0.0.0.0}
-      PORT: ${PORT:-8000}
-      ENVIRONMENT: ${ENVIRONMENT:-production}
-      DEBUG: ${DEBUG:-false}
-      LOG_LEVEL: ${LOG_LEVEL:-info}
-      SECRET_KEY: ${SECRET_KEY:-change-me-in-production}
-      CORS_ORIGINS: ${CORS_ORIGINS:-*}
-
-      # 🚀 Uvicorn
-      UVICORN_WORKERS: ${UVICORN_WORKERS:-1}
-
+      DATABASE_URL: ${DATABASE_URL}
+      SUPABASE_URL: ${SUPABASE_URL}
+      SUPABASE_ANON_KEY: ${SUPABASE_ANON_KEY}
+      SUPABASE_SERVICE_ROLE_KEY: ${SUPABASE_SERVICE_ROLE_KEY}
+      GROQ_API_KEY: ${GROQ_API_KEY}
+      GROQ_MODEL: ${GROQ_MODEL}
+      INSTAGRAM_EMAIL: ${INSTAGRAM_EMAIL}
+      INSTAGRAM_PASSWORD: ${INSTAGRAM_PASSWORD}
+      INSTAGRAM_ACCOUNTS: ${INSTAGRAM_ACCOUNTS}
+      HOST: 0.0.0.0
+      PORT: 8000
     ports:
-      - "${PORT:-8000}:${PORT:-8000}"
-    # depends_on eliminado: postgres es opcional (perfil local)
-    networks:
-      - bbva_network
+      - "8000:8000"
     restart: unless-stopped
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:${PORT:-8000}/api/health"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-      start_period: 40s
-
-volumes:
-  postgres_data:
-    driver: local
-
-networks:
-  bbva_network:
-    driver: bridge
