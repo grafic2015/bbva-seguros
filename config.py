@@ -1,7 +1,13 @@
 import os
 import json
 from pathlib import Path
-from secrets import decrypt
+
+
+# Función decrypt simplificada
+def decrypt(value):
+    """Desencriptar credenciales. En producción usa valores en .env directamente."""
+    return value if value else ""
+
 
 # Cargar secretos desde .env
 _env_path = Path(__file__).resolve().parent / ".env"

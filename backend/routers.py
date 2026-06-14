@@ -190,6 +190,22 @@ def obtener_estadisticas(db: Session = Depends(obtener_db)):
 webhook_router = APIRouter(prefix="/api/webhook", tags=["Webhooks"])
 
 
+@webhook_router.get("/instagram")
+def webhook_verify(
+    hub_mode: str = None, 
+    hub_challenge: str = None, 
+    hub_verify_token: str = None
+):
+    """Verificar webhook de Meta"""
+    print(f"Mode: {hub_mode}, Token: {hub_verify_token}, Challenge: {hub_challenge}")
+    
+    VERIFY_TOKEN = "bbva_token_123"
+    
+    if hub_mode == "subscribe" and hub_verify_token == VERIFY_TOKEN and hub_challenge:
+        return int(hub_challenge)
+    
+    return {"error": "Invalid request"}
+
 @webhook_router.post("/instagram/comment")
 def webhook_instagram_comment(event: dict, db: Session = Depends(obtener_db)):
     """Webhook para recibir comentarios de Instagram"""
