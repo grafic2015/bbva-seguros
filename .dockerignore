@@ -1,21 +1,68 @@
-__pycache__
+# Python
+__pycache__/
 *.pyc
 *.pyo
 *.pyd
 .Python
 env/
 venv/
-.venv
+.venv/
 *.egg-info/
 dist/
 build/
-.git
-.gitignore
-.dockerignore
-.env
-.DS_Store
+.pytest_cache/
+.mypy_cache/
+*.egg
+
+# Node/Frontend
 node_modules/
 frontend/node_modules/
 .next/
 out/
 .vercel/
+frontend/dist/
+
+# Git
+.git
+.gitignore
+.gitattributes
+
+# Archivos de configuración
+.dockerignore
+.env
+.env.local
+.env.*.local
+.DS_Store
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.vim/
+
+# Logs
+*.log
+logs/
+*.pot
+
+# Temporal
+tmp/
+temp/
+*.tmp
+
+# Docker
+Dockerfile
+docker-compose*.yml
+
+# Documentación
+README.md
+*.md
+CHANGELOG.md
+
+# Otros
+.editorconfig
+.nvmrc
+.ruby-version
+.python-version

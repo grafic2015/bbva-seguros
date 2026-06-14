@@ -1,0 +1,313 @@
+# ═════════════════════════════════════════════════════════════════════════
+# Oracle Cloud Container Instance
+# ═════════════════════════════════════════════════════════════════════════
+# Usa este archivo para deployar en Oracle Cloud Container Instances
+# Reemplaza los valores entre {{ }} con tus datos reales
+
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: bbva-seguros
+
+---
+# Configuración de secretos (credenciales)
+apiVersion: v1
+kind: Secret
+metadata:
+  name: bbva-secrets
+  namespace: bbva-seguros
+type: Opaque
+stringData:
+  # Database
+  DATABASE_URL: "postgresql://bbva_user:{{ POSTGRES_PASSWORD }}@postgres:5432/bbva_seguros"
+  POSTGRES_USER: "bbva_user"
+  POSTGRES_PASSWORD: "{{ POSTGRES_PASSWORD }}"
+
+  # OpenAI
+  OPENAI_API_KEY: "{{ OPENAI_API_KEY }}"
+  OPENAI_MODEL: "gpt-4o-mini"
+
+  # Instagram
+  INSTAGRAM_EMAIL: "{{ INSTAGRAM_EMAIL }}"
+  INSTAGRAM_PASSWORD: "{{ INSTAGRAM_PASSWORD }}"
+  INSTAGRAM_ACCOUNTS: "bbva,seguros_bbva"
+
+  # Security
+  SECRET_KEY: "{{ SECRET_KEY }}"
+  CORS_ORIGINS: "http://localhost:3000,https://{{ YOUR_DOMAIN }}"
+
+---
+# ConfigMap para configuración no sensible
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: bbva-config
+  namespace: bbva-seguros
+data:
+  ENVIRONMENT: "production"
+  DEBUG: "false"
+  LOG_LEVEL: "info"
+  HOST: "0.0.0.0"
+  PORT: "8000"
+  UVICORN_WORKERS: "4"
+
+---
+# PostgreSQL StatefulSet
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: postgres
+  namespace: bbva-seguros
+spec:
+  serviceName: postgres
+  replicas: 1
+  selector:
+    matchLabels:
+      app: postgres
+  template:
+    metadata:
+      labels:
+        app: postgres
+    spec:
+      containers:
+      - name: postgres
+        image: postgres:15-alpine
+        ports:
+        - containerPort: 5432
+          name: postgres
+        env:
+        - name: POSTGRES_USER
+          valueFrom:
+            secretKeyRef:
+              name: bbva-secrets
+              key: POSTGRES_USER
+        - name: POSTGRES_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: bbva-secrets
+              key: POSTGRES_PASSWORD
+        - name: POSTGRES_DB
+          value: bbva_seguros
+        volumeMounts:
+        - name: postgres-storage
+          mountPath: /var/lib/postgresql/data
+        livenessProbe:
+          exec:
+            command:
+            - /bin/sh
+            - -c
+            - pg_isready -U bbva_user
+          initialDelaySeconds: 30
+          periodSeconds: 10
+        readinessProbe:
+          exec:
+            command:
+            - /bin/sh
+            - -c
+            - pg_isready -U bbva_user
+          initialDelaySeconds: 5
+          periodSeconds: 10
+        resources:
+          requests:
+            memory: "256Mi"
+            cpu: "250m"
+          limits:
+            memory: "512Mi"
+            cpu: "500m"
+  volumeClaimTemplates:
+  - metadata:
+      name: postgres-storage
+    spec:
+      accessModes: [ "ReadWriteOnce" ]
+      resources:
+        requests:
+          storage: 10Gi
+
+---
+# PostgreSQL Service
+apiVersion: v1
+kind: Service
+metadata:
+  name: postgres
+  namespace: bbva-seguros
+spec:
+  clusterIP: None
+  selector:
+    app: postgres
+  ports:
+  - port: 5432
+    targetPort: 5432
+
+---
+# Backend Deployment
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: bbva-backend
+  namespace: bbva-seguros
+  labels:
+    app: bbva-backend
+    version: v1
+spec:
+  replicas: 2
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 0
+  selector:
+    matchLabels:
+      app: bbva-backend
+  template:
+    metadata:
+      labels:
+        app: bbva-backend
+    spec:
+      serviceAccountName: bbva-backend
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1000
+        fsGroup: 1000
+      containers:
+      - name: backend
+        image: "{{ OCIR_REGION }}.ocir.io/{{ OCIR_NAMESPACE }}/{{ OCIR_REPO }}:latest"
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 8000
+          name: http
+          protocol: TCP
+        envFrom:
+        - secretRef:
+            name: bbva-secrets
+        - configMapRef:
+            name: bbva-config
+        livenessProbe:
+          httpGet:
+            path: /api/health
+            port: 8000
+          initialDelaySeconds: 40
+          periodSeconds: 10
+          timeoutSeconds: 5
+          failureThreshold: 3
+        readinessProbe:
+          httpGet:
+            path: /api/health
+            port: 8000
+          initialDelaySeconds: 20
+          periodSeconds: 5
+          timeoutSeconds: 3
+          failureThreshold: 3
+        resources:
+          requests:
+            memory: "512Mi"
+            cpu: "250m"
+          limits:
+            memory: "1Gi"
+            cpu: "500m"
+        securityContext:
+          allowPrivilegeEscalation: false
+          readOnlyRootFilesystem: true
+          capabilities:
+            drop:
+            - ALL
+        volumeMounts:
+        - name: tmp
+          mountPath: /tmp
+      volumes:
+      - name: tmp
+        emptyDir: {}
+      affinity:
+        podAntiAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution:
+          - weight: 100
+            podAffinityTerm:
+              labelSelector:
+                matchExpressions:
+                - key: app
+                  operator: In
+                  values:
+                  - bbva-backend
+              topologyKey: kubernetes.io/hostname
+
+---
+# Backend Service
+apiVersion: v1
+kind: Service
+metadata:
+  name: bbva-backend
+  namespace: bbva-seguros
+  labels:
+    app: bbva-backend
+spec:
+  type: LoadBalancer
+  ports:
+  - port: 80
+    targetPort: 8000
+    protocol: TCP
+    name: http
+  selector:
+    app: bbva-backend
+
+---
+# HorizontalPodAutoscaler
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: bbva-backend-hpa
+  namespace: bbva-seguros
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: bbva-backend
+  minReplicas: 2
+  maxReplicas: 10
+  metrics:
+  - type: Resource
+    resource:
+      name: cpu
+      target:
+        type: Utilization
+        averageUtilization: 70
+  - type: Resource
+    resource:
+      name: memory
+      target:
+        type: Utilization
+        averageUtilization: 80
+
+---
+# ServiceAccount
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: bbva-backend
+  namespace: bbva-seguros
+
+---
+# Role para acceder a Secrets
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: bbva-backend
+  namespace: bbva-seguros
+rules:
+- apiGroups: [""]
+  resources: ["secrets"]
+  verbs: ["get"]
+
+---
+# RoleBinding
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: bbva-backend
+  namespace: bbva-seguros
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: bbva-backend
+subjects:
+- kind: ServiceAccount
+  name: bbva-backend
+  namespace: bbva-seguros

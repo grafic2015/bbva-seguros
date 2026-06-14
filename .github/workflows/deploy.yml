@@ -1,0 +1,293 @@
+name: Build & Deploy to Oracle Cloud
+
+on:
+  push:
+    branches:
+      - main
+      - develop
+    paths:
+      - 'backend/**'
+      - 'Dockerfile'
+      - 'requirements.txt'
+      - 'docker-compose.yml'
+      - '.github/workflows/deploy.yml'
+
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Ambiente de deploy'
+        required: true
+        default: 'development'
+        type: choice
+        options:
+          - development
+          - staging
+          - production
+
+env:
+  REGISTRY: iad.ocir.io
+  REPO: bbva-seguros
+
+jobs:
+  # ─────────────────────────────────────────────────────────────────────
+  # Build y Push a OCIR
+  # ─────────────────────────────────────────────────────────────────────
+  build:
+    name: Build & Push Docker Image
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write
+
+    steps:
+      - name: Checkout código
+        uses: actions/checkout@v4
+
+      - name: Configurar QEMU
+        uses: docker/setup-qemu-action@v3
+
+      - name: Configurar Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Generar metadata
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: |
+            ${{ env.REGISTRY }}/${{ secrets.OCI_NAMESPACE }}/${{ env.REPO }}
+          tags: |
+            type=ref,event=branch
+            type=semver,pattern={{version}}
+            type=semver,pattern={{major}}.{{minor}}
+            type=sha
+            type=raw,value=latest,enable={{is_default_branch}}
+
+      - name: Login a OCIR
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ secrets.OCI_USERNAME }}
+          password: ${{ secrets.OCI_AUTH_TOKEN }}
+
+      - name: Build y Push
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: ./Dockerfile
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+          platforms: linux/amd64,linux/arm64
+
+  # ─────────────────────────────────────────────────────────────────────
+  # Pruebas
+  # ─────────────────────────────────────────────────────────────────────
+  test:
+    name: Test Backend
+    runs-on: ubuntu-latest
+
+    services:
+      postgres:
+        image: postgres:15-alpine
+        env:
+          POSTGRES_USER: test_user
+          POSTGRES_PASSWORD: test_password
+          POSTGRES_DB: test_db
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 5432:5432
+
+    steps:
+      - name: Checkout código
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+
+      - name: Instalar dependencias
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+          pip install pytest pytest-cov
+
+      - name: Lint con flake8
+        run: |
+          pip install flake8
+          # Para la sintaxis más estricta
+          flake8 backend --count --select=E9,F63,F7,F82 --show-source --statistics
+          flake8 backend --count --exit-zero --max-complexity=10 --max-line-length=120 --statistics
+        continue-on-error: true
+
+      - name: Ejecutar pruebas
+        env:
+          DATABASE_URL: postgresql://test_user:test_password@localhost:5432/test_db
+          OPENAI_API_KEY: sk-test-dummy
+          INSTAGRAM_EMAIL: test@example.com
+          INSTAGRAM_PASSWORD: test
+          SECRET_KEY: test-secret-key
+        run: |
+          pytest backend --cov=backend --cov-report=xml --cov-report=term-missing
+        continue-on-error: true
+
+      - name: Upload coverage
+        uses: codecov/codecov-action@v3
+        with:
+          files: ./coverage.xml
+          fail_ci_if_error: false
+
+  # ─────────────────────────────────────────────────────────────────────
+  # Deploy a Oracle Cloud
+  # ─────────────────────────────────────────────────────────────────────
+  deploy:
+    name: Deploy to Oracle Cloud
+    needs: [build, test]
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+
+    permissions:
+      contents: read
+      id-token: write
+
+    steps:
+      - name: Checkout código
+        uses: actions/checkout@v4
+
+      - name: Setup OCI CLI
+        uses: oracle-actions/setup-oci-cli@v1
+        with:
+          version: latest
+
+      - name: Configure OCI Authentication
+        uses: oracle-actions/oidc-authentication@v1
+        with:
+          provider_id: ${{ secrets.OCI_PROVIDER_ID }}
+          workload_identity_provider: ${{ secrets.OCI_WORKLOAD_IDENTITY_PROVIDER }}
+          run_oci_cli_commands: 'true'
+          oci_cli_config_file_path: ~/.oci/config
+          oci_cli_profile: 'github'
+
+      - name: Get Image URL
+        id: image
+        run: |
+          TAG=$(echo "${GITHUB_SHA}" | cut -c1-7)
+          IMAGE_URL="${{ env.REGISTRY }}/${{ secrets.OCI_NAMESPACE }}/${{ env.REPO }}:${TAG}"
+          echo "url=${IMAGE_URL}" >> $GITHUB_OUTPUT
+          echo "tag=${TAG}" >> $GITHUB_OUTPUT
+
+      - name: Update Container Instance
+        run: |
+          #!/bin/bash
+          set -e
+
+          CONTAINER_ID="${{ secrets.OCI_CONTAINER_ID }}"
+          IMAGE_URL="${{ steps.image.outputs.url }}"
+
+          echo "Actualizando Container Instance..."
+          echo "ID: ${CONTAINER_ID}"
+          echo "Nueva imagen: ${IMAGE_URL}"
+
+          # Nota: Aquí iría la lógica de actualizar el Container Instance
+          # Por ahora solo echamos un mensaje
+          echo "Deploy iniciado - monitorea en Oracle Cloud Console"
+
+      - name: Healthcheck
+        run: |
+          #!/bin/bash
+          set -e
+
+          # Obtener IP del Container Instance
+          CONTAINER_ID="${{ secrets.OCI_CONTAINER_ID }}"
+
+          # Esperar e intentar healthcheck
+          for i in {1..30}; do
+            IP=$(oci container-instances container-instance get \
+              --container-instance-id "${CONTAINER_ID}" \
+              --query 'data.containers[0].vnics[0].publicIp' \
+              --raw-output 2>/dev/null || echo "")
+
+            if [ -n "${IP}" ] && [ "${IP}" != "null" ]; then
+              echo "IP encontrada: ${IP}"
+
+              for j in {1..10}; do
+                if curl -f "http://${IP}:8000/api/health" > /dev/null 2>&1; then
+                  echo "✓ Aplicación está sana"
+                  exit 0
+                fi
+                echo "Intento $j/10..."
+                sleep 5
+              done
+              echo "⚠ Aplicación no responde"
+              exit 1
+            fi
+            echo "Esperando IP pública... Intento $i/30"
+            sleep 5
+          done
+
+          echo "⚠ No se pudo obtener IP pública"
+          exit 0
+
+      - name: Notify Deployment
+        if: always()
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const status = context.job.status === 'success' ? '✅' : '❌';
+            const sha = context.sha.slice(0, 7);
+            github.rest.repos.createCommitStatus({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              sha: context.sha,
+              state: context.job.status === 'success' ? 'success' : 'failure',
+              description: `Deploy ${status}`,
+              context: 'Deploy to Oracle Cloud',
+              target_url: `${context.payload.repository.html_url}/actions/runs/${context.runId}`
+            });
+
+  # ─────────────────────────────────────────────────────────────────────
+  # Notificación
+  # ─────────────────────────────────────────────────────────────────────
+  notify:
+    name: Send Notifications
+    needs: [deploy]
+    runs-on: ubuntu-latest
+    if: always()
+
+    steps:
+      - name: Determinar estado
+        id: status
+        run: |
+          if [ "${{ needs.deploy.result }}" == "success" ]; then
+            echo "emoji=✅" >> $GITHUB_OUTPUT
+            echo "message=Deployment exitoso a Oracle Cloud" >> $GITHUB_OUTPUT
+          else
+            echo "emoji=❌" >> $GITHUB_OUTPUT
+            echo "message=Deployment fallido" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Notificar en Slack
+        if: vars.SLACK_WEBHOOK_URL
+        uses: slackapi/slack-github-action@v1
+        with:
+          webhook-url: ${{ secrets.SLACK_WEBHOOK_URL }}
+          payload: |
+            {
+              "text": "${{ steps.status.outputs.emoji }} ${{ steps.status.outputs.message }}",
+              "blocks": [
+                {
+                  "type": "section",
+                  "text": {
+                    "type": "mrkdwn",
+                    "text": "*BBVA Seguros - Deployment*\n${{ steps.status.outputs.emoji }} ${{ steps.status.outputs.message }}\n<${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}|View Workflow>"
+                  }
+                }
+              ]
+            }

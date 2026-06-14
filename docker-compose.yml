@@ -5,9 +5,9 @@ services:
     image: postgres:15-alpine
     container_name: bbva_postgres
     environment:
-      POSTGRES_USER: bbva_user
-      POSTGRES_PASSWORD: bbva_password_123
-      POSTGRES_DB: bbva_seguros
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
     ports:
       - "5432:5432"
     volumes:
@@ -15,30 +15,62 @@ services:
     networks:
       - bbva_network
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U bbva_user"]
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER}"]
       interval: 10s
       timeout: 5s
       retries: 5
+    restart: unless-stopped
 
   backend:
-    build: .
+    build:
+      context: .
+      dockerfile: Dockerfile
     container_name: bbva_backend
     environment:
-      DATABASE_URL: postgresql://bbva_user:bbva_password_123@postgres:5432/bbva_seguros
+      # Base de datos
+      DATABASE_URL: ${DATABASE_URL}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
+
+      # API Keys
       OPENAI_API_KEY: ${OPENAI_API_KEY}
+      OPENAI_MODEL: ${OPENAI_MODEL}
+
+      # Instagram
       INSTAGRAM_EMAIL: ${INSTAGRAM_EMAIL}
       INSTAGRAM_PASSWORD: ${INSTAGRAM_PASSWORD}
+      INSTAGRAM_ACCOUNTS: ${INSTAGRAM_ACCOUNTS}
+
+      # Servidor
+      HOST: ${HOST}
+      PORT: ${PORT}
+      ENVIRONMENT: ${ENVIRONMENT}
+      DEBUG: ${DEBUG}
+      LOG_LEVEL: ${LOG_LEVEL}
+      SECRET_KEY: ${SECRET_KEY}
+      CORS_ORIGINS: ${CORS_ORIGINS}
+
+      # Uvicorn
+      UVICORN_WORKERS: ${UVICORN_WORKERS}
     ports:
-      - "8000:8000"
+      - "${PORT}:${PORT}"
     depends_on:
       postgres:
         condition: service_healthy
     networks:
       - bbva_network
-    restart: always
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:${PORT}/api/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
 
 volumes:
   postgres_data:
+    driver: local
 
 networks:
   bbva_network:
