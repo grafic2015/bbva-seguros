@@ -31,6 +31,16 @@ TRIGGER_KEYWORDS    = ["quiero", "interesado", "cotizar", "cotización", "presup
 AUTO_RESPONSE_MESSAGE = "¡Hola! 🚗 Tenemos seguros de auto con excelentes coberturas. ¿Te gustaría cotizar? Escríbeme aquí o llama al 1173665439"
 LEADS_FILE          = "leads_instagram.json"
 
+# ── Groq IA ───────────────────────────────────────────────────────────────────
+GROQ_API_KEY = os.getenv("GROQ_API_KEY", "")
+GROQ_MODEL   = os.getenv("GROQ_MODEL", "llama3-70b-8192")
+
+# ── Supabase ──────────────────────────────────────────────────────────────────
+DATABASE_URL              = os.getenv("DATABASE_URL", "")
+SUPABASE_URL              = os.getenv("SUPABASE_URL", "")
+SUPABASE_ANON_KEY         = os.getenv("SUPABASE_ANON_KEY", "")
+SUPABASE_SERVICE_ROLE_KEY = os.getenv("SUPABASE_SERVICE_ROLE_KEY", "")
+
 # Cargar settings.json si existe
 _settings_path = Path(__file__).resolve().parent / "settings.json"
 
