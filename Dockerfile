@@ -52,5 +52,5 @@ EXPOSE 8000
 HEALTHCHECK --interval=30s --timeout=10s --start-period=40s --retries=3 \
     CMD curl -f http://localhost:8000/api/health || exit 1
 
-# Ejecutar aplicación con Uvicorn (con SSL si los certs existen)
-CMD ["sh", "-c", "if [ -f /app/certs/cert.pem ]; then uvicorn backend.app:app --host 0.0.0.0 --port 8000 --ssl-keyfile=/app/certs/key.pem --ssl-certfile=/app/certs/cert.pem; else uvicorn backend.app:app --host 0.0.0.0 --port 8000; fi"]
+# Ejecutar aplicación con Uvicorn
+CMD ["uvicorn", "backend.app:app", "--host", "0.0.0.0", "--port", "8000"]
