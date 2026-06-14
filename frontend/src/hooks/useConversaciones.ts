@@ -31,7 +31,7 @@ export function useConversaciones() {
 
   const crearConversacion = async (leadId: number, mensaje: string, respuesta?: string) => {
     try {
-      const res = await fetch(`${import.meta.env.VITE_API_URL || ''}/api/conversaciones/', {
+      const res = await fetch(`${import.meta.env.VITE_API_URL || ''}/api/conversaciones/`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({

@@ -21,7 +21,7 @@ export function useStats() {
   const fetchStats = async () => {
     setLoading(true)
     try {
-      const res = await fetch(`${import.meta.env.VITE_API_URL || ''}/api/stats/')
+      const res = await fetch(`${import.meta.env.VITE_API_URL || ''}/api/stats/`)
       if (!res.ok) throw new Error('Error al obtener estadísticas')
       const data = await res.json()
       setStats(data)
