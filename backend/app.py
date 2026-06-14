@@ -58,6 +58,27 @@ def root():
     }
 
 
+@app.get("/api/status")
+def api_status():
+    """Estado general del sistema"""
+    from backend.models import obtener_db, Lead
+    from sqlalchemy import func
+    try:
+        db = next(obtener_db())
+        total = db.query(func.count(Lead.id)).scalar() or 0
+        return {
+            "ok": True,
+            "status": "running",
+            "total_leads": total,
+            "agents": {
+                "instagram": {"status": "idle"},
+                "leads_manager": {"status": "idle"}
+            }
+        }
+    except Exception as e:
+        return {"ok": False, "error": str(e), "status": "error"}
+
+
 # ═══════════════════════════════════════════════════════════════════════════
 # ERROR HANDLERS
 # ═══════════════════════════════════════════════════════════════════════════
