@@ -60,6 +60,18 @@ def root():
     }
 
 
+@app.options("/api/status")
+def api_status_options():
+    """Preflight CORS"""
+    return JSONResponse(
+        content={},
+        headers={
+            "Access-Control-Allow-Origin": "*",
+            "Access-Control-Allow-Methods": "GET, OPTIONS",
+            "Access-Control-Allow-Headers": "*",
+        }
+    )
+
 @app.get("/api/status")
 def api_status():
     """Estado general del sistema"""
