@@ -23,7 +23,11 @@ export function useAgentSocket() {
       .catch(() => {});
 
     const proto = location.protocol === "https:" ? "wss" : "ws";
-    const defaultWsUrl = `${proto}://${location.host}/ws`;
+    let defaultWsUrl = `${proto}://${location.host}/ws`;
+    const apiUrlForWs = import.meta.env.VITE_API_URL;
+    if (apiUrlForWs) {
+      defaultWsUrl = apiUrlForWs.replace(/^http/, 'ws') + '/ws';
+    }
     const url = import.meta.env.VITE_WS_URL || defaultWsUrl;
     let ws: WebSocket | null = null;
     let retry = 0;
