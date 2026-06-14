@@ -21,7 +21,7 @@ export function useCotizaciones() {
   const obtenerCotizacionesLead = async (leadId: number) => {
     setLoading(true)
     try {
-      const res = await fetch(`/api/cotizaciones/lead/${leadId}`)
+      const res = await fetch(`${import.meta.env.VITE_API_URL || ''}/api/cotizaciones/lead/${leadId}`)
       if (!res.ok) throw new Error('Error al obtener cotizaciones')
       const data = await res.json()
       setCotizaciones(Array.isArray(data) ? data : [])
@@ -42,7 +42,7 @@ export function useCotizaciones() {
     descuento_porcentaje?: number
   }) => {
     try {
-      const res = await fetch('/api/cotizaciones/', {
+      const res = await fetch(`${import.meta.env.VITE_API_URL || ''}/api/cotizaciones/', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({

@@ -14,7 +14,8 @@ export function useAgentSocket() {
 
   useEffect(() => {
     // Traer datos iniciales al cargar la página
-    fetch("/api/status")
+    const apiUrl = import.meta.env.VITE_API_URL || "";
+    fetch(`${apiUrl}/api/status`)
       .then((r) => r.json())
       .then((d) => {
         if (d.leads) setLeads(d.leads);
@@ -22,7 +23,8 @@ export function useAgentSocket() {
       .catch(() => {});
 
     const proto = location.protocol === "https:" ? "wss" : "ws";
-    const url = `${proto}://${location.host}/ws`;
+    const defaultWsUrl = `${proto}://${location.host}/ws`;
+    const url = import.meta.env.VITE_WS_URL || defaultWsUrl;
     let ws: WebSocket | null = null;
     let retry = 0;
     let stopped = false;
@@ -33,7 +35,8 @@ export function useAgentSocket() {
         setConnected(true);
         retry = 0;
         // Refrescar leads al reconectar
-        fetch("/api/status")
+        const apiUrl = import.meta.env.VITE_API_URL || "";
+        fetch(`${apiUrl}/api/status`)
           .then((r) => r.json())
           .then((d) => { if (d.leads) setLeads(d.leads); })
           .catch(() => {});
@@ -78,9 +81,11 @@ export function useAgentSocket() {
 }
 
 export async function startAgent(agent: string) {
-  await fetch(`/api/agents/${agent}/start`, { method: "POST" });
+  const apiUrl = import.meta.env.VITE_API_URL || "";
+  await fetch(`${apiUrl}/api/agents/${agent}/start`, { method: "POST" });
 }
 
 export async function stopAgent(agent: string) {
-  await fetch(`/api/agents/${agent}/stop`, { method: "POST" });
+  const apiUrl = import.meta.env.VITE_API_URL || "";
+  await fetch(`${apiUrl}/api/agents/${agent}/stop`, { method: "POST" });
 }

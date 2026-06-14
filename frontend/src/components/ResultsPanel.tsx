@@ -49,7 +49,7 @@ export function ResultsPanel() {
       ),
     }));
     try {
-      await fetch(`/api/leads/${encodeURIComponent(usuario)}/status`, {
+      await fetch(`${import.meta.env.VITE_API_URL || ''}/api/leads/${encodeURIComponent(usuario)}/status`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ estado: nuevoEstado }),

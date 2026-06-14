@@ -54,7 +54,7 @@ export function useLeads() {
     comentario_inicial?: string
   }) => {
     try {
-      const res = await fetch('/api/leads/', {
+      const res = await fetch(`${import.meta.env.VITE_API_URL || ''}/api/leads/', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(lead)
@@ -71,7 +71,7 @@ export function useLeads() {
 
   const actualizarEstado = async (leadId: number, nuevoEstado: string) => {
     try {
-      const res = await fetch(`/api/leads/${leadId}/estado/${nuevoEstado}`, {
+      const res = await fetch(`${import.meta.env.VITE_API_URL || ''}/api/leads/${leadId}/estado/${nuevoEstado}`, {
         method: 'PATCH'
       })
       if (!res.ok) throw new Error('Error al actualizar estado')
@@ -86,7 +86,7 @@ export function useLeads() {
 
   const obtenerLeadPorId = async (leadId: number) => {
     try {
-      const res = await fetch(`/api/leads/${leadId}`)
+      const res = await fetch(`${import.meta.env.VITE_API_URL || ''}/api/leads/${leadId}`)
       if (!res.ok) throw new Error('Lead no encontrado')
       return await res.json()
     } catch (err) {

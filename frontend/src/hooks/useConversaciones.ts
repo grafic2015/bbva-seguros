@@ -17,7 +17,7 @@ export function useConversaciones() {
   const obtenerConversacionesLead = async (leadId: number) => {
     setLoading(true)
     try {
-      const res = await fetch(`/api/conversaciones/lead/${leadId}`)
+      const res = await fetch(`${import.meta.env.VITE_API_URL || ''}/api/conversaciones/lead/${leadId}`)
       if (!res.ok) throw new Error('Error al obtener conversaciones')
       const data = await res.json()
       setConversaciones(Array.isArray(data) ? data : [])
@@ -31,7 +31,7 @@ export function useConversaciones() {
 
   const crearConversacion = async (leadId: number, mensaje: string, respuesta?: string) => {
     try {
-      const res = await fetch('/api/conversaciones/', {
+      const res = await fetch(`${import.meta.env.VITE_API_URL || ''}/api/conversaciones/', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
