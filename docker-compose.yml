@@ -1,16 +1,13 @@
-version: '3.8'
-
 # ═════════════════════════════════════════════════════════════════════════
 # BBVA Seguros - Docker Compose
 #
 # 📌 Modos de uso:
 #
-# 1. CON SUPABASE (producción):
-#    docker-compose up -d backend
-#    (PostgreSQL no necesario, usa DATABASE_URL de Supabase)
+# 1. CON SUPABASE (producción) - solo levanta el backend:
+#    docker compose up -d backend
 #
-# 2. CON POSTGRES LOCAL (desarrollo sin conexión internet):
-#    docker-compose up -d
+# 2. CON POSTGRES LOCAL (desarrollo sin internet):
+#    docker compose --profile local up -d
 #    (Levanta postgres + backend)
 # ═════════════════════════════════════════════════════════════════════════
 
@@ -38,7 +35,7 @@ services:
       retries: 5
     restart: unless-stopped
     profiles:
-      - local  # Usar: docker-compose --profile local up
+      - local  # Usar: docker compose --profile local up -d
 
   backend:
     build:
@@ -49,43 +46,42 @@ services:
       # 🗄️  BASE DE DATOS
       # Supabase: DATABASE_URL=postgresql://postgres.xxxx:pass@pooler.supabase.com:6543/postgres
       # Local:    DATABASE_URL=postgresql://postgres:postgres@postgres:5432/bbva_seguros
-      DATABASE_URL: ${DATABASE_URL}
+      DATABASE_URL: ${DATABASE_URL:-}
 
       # Supabase (opcional)
       SUPABASE_URL: ${SUPABASE_URL:-}
       SUPABASE_ANON_KEY: ${SUPABASE_ANON_KEY:-}
       SUPABASE_SERVICE_ROLE_KEY: ${SUPABASE_SERVICE_ROLE_KEY:-}
 
-      # 🔑 API Keys
-      OPENAI_API_KEY: ${OPENAI_API_KEY}
-      OPENAI_MODEL: ${OPENAI_MODEL}
+      # 🔑 API Keys (opcionales)
+      OPENAI_API_KEY: ${OPENAI_API_KEY:-}
+      OPENAI_MODEL: ${OPENAI_MODEL:-gpt-4o-mini}
 
       # 📱 Instagram
-      INSTAGRAM_EMAIL: ${INSTAGRAM_EMAIL}
-      INSTAGRAM_PASSWORD: ${INSTAGRAM_PASSWORD}
-      INSTAGRAM_ACCOUNTS: ${INSTAGRAM_ACCOUNTS}
+      INSTAGRAM_EMAIL: ${INSTAGRAM_EMAIL:-}
+      INSTAGRAM_PASSWORD: ${INSTAGRAM_PASSWORD:-}
+      INSTAGRAM_ACCOUNTS: ${INSTAGRAM_ACCOUNTS:-}
 
       # 🌐 Servidor
-      HOST: ${HOST}
-      PORT: ${PORT}
-      ENVIRONMENT: ${ENVIRONMENT}
-      DEBUG: ${DEBUG}
-      LOG_LEVEL: ${LOG_LEVEL}
-      SECRET_KEY: ${SECRET_KEY}
-      CORS_ORIGINS: ${CORS_ORIGINS}
+      HOST: ${HOST:-0.0.0.0}
+      PORT: ${PORT:-8000}
+      ENVIRONMENT: ${ENVIRONMENT:-production}
+      DEBUG: ${DEBUG:-false}
+      LOG_LEVEL: ${LOG_LEVEL:-info}
+      SECRET_KEY: ${SECRET_KEY:-change-me-in-production}
+      CORS_ORIGINS: ${CORS_ORIGINS:-*}
 
       # 🚀 Uvicorn
-      UVICORN_WORKERS: ${UVICORN_WORKERS}
+      UVICORN_WORKERS: ${UVICORN_WORKERS:-1}
 
     ports:
-      - "${PORT}:${PORT}"
-    depends_on:
-      - postgres
+      - "${PORT:-8000}:${PORT:-8000}"
+    # depends_on eliminado: postgres es opcional (perfil local)
     networks:
       - bbva_network
     restart: unless-stopped
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:${PORT}/api/health"]
+      test: ["CMD", "curl", "-f", "http://localhost:${PORT:-8000}/api/health"]
       interval: 30s
       timeout: 10s
       retries: 3
