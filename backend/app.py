@@ -68,17 +68,30 @@ def api_status():
     try:
         db = next(obtener_db())
         total = db.query(func.count(Lead.id)).scalar() or 0
-        return {
-            "ok": True,
-            "status": "running",
-            "total_leads": total,
-            "agents": {
-                "instagram": {"status": "idle"},
-                "leads_manager": {"status": "idle"}
+        return JSONResponse(
+            content={
+                "ok": True,
+                "status": "running",
+                "total_leads": total,
+                "agents": {
+                    "instagram": {"status": "idle"},
+                    "leads_manager": {"status": "idle"}
+                }
+            },
+            headers={
+                "Access-Control-Allow-Origin": "*",
+                "Access-Control-Allow-Methods": "GET, OPTIONS",
+                "Access-Control-Allow-Headers": "*",
             }
-        }
+        )
     except Exception as e:
-        return {"ok": False, "error": str(e), "status": "error"}
+        return JSONResponse(
+            content={"ok": False, "error": str(e), "status": "error"},
+            status_code=500,
+            headers={
+                "Access-Control-Allow-Origin": "*",
+            }
+        )
 
 
 # ═══════════════════════════════════════════════════════════════════════════
