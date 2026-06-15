@@ -308,7 +308,12 @@ def _procesar_comentarios(cl) -> int:
 # ── 2) Responder DMs entrantes (conversación con Groq) ────────────────────────
 
 def _procesar_dms(cl) -> int:
-    """Lee DMs entrantes de leads conocidos y los responde con Groq. Devuelve mensajes respondidos."""
+    """
+    Lee DMs entrantes y los responde con Groq. Devuelve mensajes respondidos.
+    - Si el remitente ya es lead: continúa la conversación.
+    - Si es alguien nuevo y su mensaje menciona una keyword ("quiero"...): lo
+      captura como lead y arranca la conversación.
+    """
     respondidos = 0
     db = SessionLocal()
     try:
@@ -328,9 +333,7 @@ def _procesar_dms(cl) -> int:
                 if not otros:
                     continue
                 username = otros[0].username
-                lead = db.query(Lead).filter(Lead.usuario_instagram == username).first()
-                if not lead:
-                    continue  # solo conversamos con leads ya capturados
+                nombre = getattr(otros[0], "full_name", "") or username
 
                 mensajes = cl.direct_messages(th.id, amount=5)
                 # El más reciente debe ser del usuario (no nuestro)
@@ -343,6 +346,14 @@ def _procesar_dms(cl) -> int:
                 texto_usuario = (ultimo.text or "").strip()
                 if not texto_usuario:
                     continue
+
+                lead = db.query(Lead).filter(Lead.usuario_instagram == username).first()
+                if not lead:
+                    # Lead nuevo que escribe directo por DM: capturar solo si menciona la keyword.
+                    if not detect_trigger_keyword(texto_usuario):
+                        continue
+                    lead = _get_or_create_lead(db, username, nombre, texto_usuario)
+                    _log(f"🎯 Lead nuevo por DM: @{username} — '{texto_usuario[:40]}'")
 
                 # Reconstruir historial desde la DB
                 convs = db.query(Conversacion).filter(
