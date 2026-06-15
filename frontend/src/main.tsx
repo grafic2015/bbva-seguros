@@ -90,13 +90,6 @@ function Root() {
     <>
       <div style={switcher}>
         <button
-          onClick={() => window.open(`${location.pathname}?view=leads`, "_blank")}
-          style={tab}
-          title="Abrir la tabla de leads en una pestaña nueva"
-        >
-          📋 Abrir Leads
-        </button>
-        <button
           onClick={() => { clearToken(); location.reload(); }}
           style={{ ...tab, color: "#f85149" }}
           title="Cerrar sesión"
