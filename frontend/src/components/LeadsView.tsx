@@ -7,7 +7,7 @@ const ESTADO_META: Record<string, { label: string; color: string; bg: string; em
   nuevo:          { label: "Nuevo",          color: "#d29922", bg: "#d2992222", emoji: "🆕" },
   interesado:     { label: "Interesado",     color: "#e1306c", bg: "#e1306c22", emoji: "👍" },
   en_seguimiento: { label: "En seguimiento", color: "#58a6ff", bg: "#58a6ff22", emoji: "🔄" },
-  convertido:     { label: "Convertido",     color: "#3fb950", bg: "#3fb95022", emoji: "✅" },
+  convertido:     { label: "Aprobado",       color: "#3fb950", bg: "#3fb95022", emoji: "✅" },
   rechazado:      { label: "Rechazado",      color: "#f85149", bg: "#f8514922", emoji: "❌" },
 };
 

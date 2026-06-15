@@ -54,7 +54,7 @@ export function ControlPanel() {
           </div>
           <div style={styles.statItem}>
             <span style={{ ...styles.statVal, color: "#3fb950" }}>{stats.convertidos}</span>
-            <span style={styles.statLabel}>Convertidos</span>
+            <span style={styles.statLabel}>Aprobados</span>
           </div>
         </div>
         {/* Barra de progreso de conversión */}
