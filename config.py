@@ -26,6 +26,8 @@ AUTO_RESPONSE_MESSAGE = "¡Hola! 🚗 Tenemos seguros de auto con excelentes cob
 # Sesión persistente de instagrapi y cuántos posts revisar por ciclo
 IG_SESSION_FILE     = os.getenv("IG_SESSION_FILE", "/app/data/ig_session.json")
 IG_POSTS_TO_CHECK   = int(os.getenv("IG_POSTS_TO_CHECK", "5"))
+# Clave secreta TOTP (Google Authenticator) para re-login automático ante 2FA
+IG_TOTP_SEED        = os.getenv("IG_TOTP_SEED", "").replace(" ", "")
 LEADS_FILE          = "leads_instagram.json"  # obsoleto, conservado por compatibilidad
 
 # ── Groq IA ───────────────────────────────────────────────────────────────────

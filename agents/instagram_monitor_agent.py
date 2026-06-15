@@ -31,6 +31,7 @@ from config import (
     TRIGGER_KEYWORDS,
     IG_SESSION_FILE,
     IG_POSTS_TO_CHECK,
+    IG_TOTP_SEED,
 )
 from backend.models import SessionLocal, Lead, Conversacion
 
@@ -77,20 +78,34 @@ def get_client():
     cl = Client()
     cl.delay_range = [2, 5]  # demora interna entre requests
 
+    def _do_login():
+        """Login usando el código TOTP si hay una clave configurada (2FA automático)."""
+        if IG_TOTP_SEED:
+            code = cl.totp_generate_code(IG_TOTP_SEED)
+            cl.login(INSTAGRAM_USERNAME, INSTAGRAM_PASSWORD, verification_code=code)
+        else:
+            cl.login(INSTAGRAM_USERNAME, INSTAGRAM_PASSWORD)
+
     session_path = Path(IG_SESSION_FILE)
     if session_path.exists():
         try:
             cl.load_settings(session_path)
-            cl.login(INSTAGRAM_USERNAME, INSTAGRAM_PASSWORD)
             cl.get_timeline_feed()  # valida que la sesión siga viva
             _log("Sesión reutilizada correctamente.")
             _client = cl
             return cl
         except Exception as e:
-            _log(f"Sesión guardada inválida ({e}); re-logueando...")
+            _log(f"Sesión guardada inválida ({e}); re-logueando con 2FA automático...")
+            # Conservar el device de la sesión vieja para que IG no sospeche
+            try:
+                old = cl.get_settings()
+                cl.set_settings({})
+                cl.set_uuids(old.get("uuids", {}))
+            except Exception:
+                pass
 
-    # Login fresco
-    cl.login(INSTAGRAM_USERNAME, INSTAGRAM_PASSWORD)
+    # Login fresco (con TOTP si está configurado) y persistir la sesión
+    _do_login()
     cl.dump_settings(session_path)
     _log("Login nuevo realizado y sesión guardada.")
     _client = cl
