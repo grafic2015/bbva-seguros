@@ -11,7 +11,21 @@
       "Bash(git add *)",
       "Bash(git commit *)",
       "Bash(git cherry-pick *)",
-      "PowerShell(Get-ChildItem -Path \"C:\\\\Proyectos\\\\Seguros BBVA\" -Depth 1 | Select-Object Name, @{Name=\"Type\";Expression={if\\($_.PSIsContainer\\){\"Dir\"}else{\"File\"}}} | Format-Table -AutoSize)"
+      "PowerShell(Get-ChildItem -Path \"C:\\\\Proyectos\\\\Seguros BBVA\" -Depth 1 | Select-Object Name, @{Name=\"Type\";Expression={if\\($_.PSIsContainer\\){\"Dir\"}else{\"File\"}}} | Format-Table -AutoSize)",
+      "Bash(grep -r \"app\\\\\\\\.get\\\\|@app\\\\\\\\.get\\\\|@router\\\\\\\\.get\" \"C:\\\\Proyectos\\\\Seguros BBVA\\\\backend\")",
+      "Bash(git -C \"C:\\\\Proyectos\\\\Seguros BBVA\" add docker-compose.yml)",
+      "Bash(git -C 'C:\\\\Proyectos\\\\Seguros BBVA' commit -m ' *)",
+      "Bash(git -C \"C:\\\\Proyectos\\\\Seguros BBVA\" push)",
+      "Bash(curl -vk --max-time 10 https://api.bbvachatbot.qzz.io/)",
+      "Bash(git -C \"C:\\\\Proyectos\\\\Seguros BBVA\" status)",
+      "Bash(git -C \"C:\\\\Proyectos\\\\Seguros BBVA\" add requirements.txt)",
+      "Bash(git -C \"C:\\\\Proyectos\\\\Seguros BBVA\" add Dockerfile)",
+      "Bash(python -m py_compile backend/main.py agents/leads_manager_agent.py agents/instagram_monitor_agent.py backend/routers.py backend/crud.py backend/models.py backend/schemas.py)",
+      "Bash(npm run *)",
+      "Bash(grep -iE \"\\\\.\\(py|tsx|ts|json|zip|png|csv\\)$\")",
+      "Bash(grep -iE \"\\\\.css$\")",
+      "Bash(git rm *)",
+      "Bash(rm -f \"subir cambios a oracle.png\")"
     ]
   }
 }
