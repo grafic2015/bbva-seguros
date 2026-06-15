@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import ReactDOM from "react-dom/client";
 import App from "./App";
-import { LeadsTableNew } from "./components/LeadsTableNew";
+import { LeadsView } from "./components/LeadsView";
 import { getToken, setToken, clearToken, installAuthFetch } from "./auth";
 
 // Inyectar el token en todos los pedidos al API y manejar 401.
@@ -62,21 +62,6 @@ function Login({ onOk }: { onOk: () => void }) {
   );
 }
 
-/** Página dedicada de la tabla de leads (se abre en una pestaña nueva: ?view=leads). */
-function LeadsPage() {
-  return (
-    <div style={{ minHeight: "100vh", background: "#0d1117", color: "#e6edf3", padding: 24 }}>
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 20 }}>
-        <h1 style={{ margin: 0, fontSize: 26 }}>📋 Leads — BBVA Seguros</h1>
-        <button onClick={() => { clearToken(); location.reload(); }} style={{ ...tab, color: "#f85149" }} title="Cerrar sesión">
-          ⎋ Salir
-        </button>
-      </div>
-      <LeadsTableNew />
-    </div>
-  );
-}
-
 function Root() {
   const [authed, setAuthed] = useState<boolean>(!!getToken());
 
@@ -84,7 +69,7 @@ function Root() {
 
   // Si la URL trae ?view=leads, mostramos la tabla de leads (pestaña nueva).
   const view = new URLSearchParams(location.search).get("view");
-  if (view === "leads") return <LeadsPage />;
+  if (view === "leads") return <LeadsView />;
 
   return (
     <>
