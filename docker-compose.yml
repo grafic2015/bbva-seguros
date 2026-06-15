@@ -11,13 +11,16 @@ services:
       SUPABASE_SERVICE_ROLE_KEY: ${SUPABASE_SERVICE_ROLE_KEY}
       GROQ_API_KEY: ${GROQ_API_KEY}
       GROQ_MODEL: ${GROQ_MODEL}
-      INSTAGRAM_EMAIL: ${INSTAGRAM_EMAIL}
+      INSTAGRAM_USERNAME: ${INSTAGRAM_USERNAME}
       INSTAGRAM_PASSWORD: ${INSTAGRAM_PASSWORD}
       INSTAGRAM_ACCOUNTS: ${INSTAGRAM_ACCOUNTS}
+      IG_SESSION_FILE: /app/data/ig_session.json
+      IG_POSTS_TO_CHECK: ${IG_POSTS_TO_CHECK:-5}
       HOST: 0.0.0.0
       PORT: 8000
     ports:
       - "8000:8000"
     volumes:
       - ./certs:/app/certs:ro
+      - ./data:/app/data
     restart: unless-stopped

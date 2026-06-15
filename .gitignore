@@ -7,6 +7,8 @@ settings.local.json
 # ─── Datos generados ──────────────────────────────────────────
 leads_instagram.json
 leads_export.csv
+data/
+ig_session.json
 
 # ─── Python ───────────────────────────────────────────────────
 __pycache__/

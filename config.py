@@ -3,12 +3,6 @@ import json
 from pathlib import Path
 
 
-# Función decrypt simplificada
-def decrypt(value):
-    """Desencriptar credenciales. En producción usa valores en .env directamente."""
-    return value if value else ""
-
-
 # Cargar secretos desde .env
 _env_path = Path(__file__).resolve().parent / ".env"
 if _env_path.exists():
@@ -20,16 +14,19 @@ if _env_path.exists():
 
 # Configuracion general
 
-# Instagram Monitor - credenciales encriptadas
-_ig_email_encrypted = os.getenv("INSTAGRAM_EMAIL", "")
-_ig_password_encrypted = os.getenv("INSTAGRAM_PASSWORD", "")
-
-INSTAGRAM_EMAIL     = decrypt(_ig_email_encrypted) if _ig_email_encrypted else ""
-INSTAGRAM_PASSWORD  = decrypt(_ig_password_encrypted) if _ig_password_encrypted else ""
+# Instagram Monitor - credenciales en texto plano (el .env está en .gitignore)
+# INSTAGRAM_USERNAME es el usuario de login; se acepta INSTAGRAM_EMAIL como alias.
+INSTAGRAM_USERNAME  = os.getenv("INSTAGRAM_USERNAME", "") or os.getenv("INSTAGRAM_EMAIL", "")
+INSTAGRAM_PASSWORD  = os.getenv("INSTAGRAM_PASSWORD", "")
+INSTAGRAM_EMAIL     = INSTAGRAM_USERNAME  # alias por compatibilidad
 INSTAGRAM_ACCOUNTS  = os.getenv("INSTAGRAM_ACCOUNTS", "").split(",") if os.getenv("INSTAGRAM_ACCOUNTS") else []
 TRIGGER_KEYWORDS    = ["quiero", "interesado", "cotizar", "cotización", "presupuesto"]
 AUTO_RESPONSE_MESSAGE = "¡Hola! 🚗 Tenemos seguros de auto con excelentes coberturas. ¿Te gustaría cotizar? Escríbeme aquí o llama al 1173665439"
-LEADS_FILE          = "leads_instagram.json"
+
+# Sesión persistente de instagrapi y cuántos posts revisar por ciclo
+IG_SESSION_FILE     = os.getenv("IG_SESSION_FILE", "/app/data/ig_session.json")
+IG_POSTS_TO_CHECK   = int(os.getenv("IG_POSTS_TO_CHECK", "5"))
+LEADS_FILE          = "leads_instagram.json"  # obsoleto, conservado por compatibilidad
 
 # ── Groq IA ───────────────────────────────────────────────────────────────────
 GROQ_API_KEY = os.getenv("GROQ_API_KEY", "")
