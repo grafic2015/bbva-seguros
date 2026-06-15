@@ -9,6 +9,7 @@ leads_instagram.json
 leads_export.csv
 data/
 ig_session.json
+gen_session.py
 
 # ─── Python ───────────────────────────────────────────────────
 __pycache__/
