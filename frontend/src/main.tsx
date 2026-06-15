@@ -1,15 +1,13 @@
 import React, { useState } from "react";
 import ReactDOM from "react-dom/client";
 import App from "./App";
-import AppSeguros from "./AppSeguros";
+import { LeadsTableNew } from "./components/LeadsTableNew";
 import { getToken, setToken, clearToken, installAuthFetch } from "./auth";
 
 // Inyectar el token en todos los pedidos al API y manejar 401.
 installAuthFetch();
 
 const API = import.meta.env.VITE_API_URL || "";
-
-type View = "panel3d" | "seguros";
 
 function Login({ onOk }: { onOk: () => void }) {
   const [pw, setPw] = useState("");
@@ -64,26 +62,39 @@ function Login({ onOk }: { onOk: () => void }) {
   );
 }
 
+/** Página dedicada de la tabla de leads (se abre en una pestaña nueva: ?view=leads). */
+function LeadsPage() {
+  return (
+    <div style={{ minHeight: "100vh", background: "#0d1117", color: "#e6edf3", padding: 24 }}>
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 20 }}>
+        <h1 style={{ margin: 0, fontSize: 26 }}>📋 Leads — BBVA Seguros</h1>
+        <button onClick={() => { clearToken(); location.reload(); }} style={{ ...tab, color: "#f85149" }} title="Cerrar sesión">
+          ⎋ Salir
+        </button>
+      </div>
+      <LeadsTableNew />
+    </div>
+  );
+}
+
 function Root() {
   const [authed, setAuthed] = useState<boolean>(!!getToken());
-  const [view, setView] = useState<View>("panel3d");
 
   if (!authed) return <Login onOk={() => setAuthed(true)} />;
+
+  // Si la URL trae ?view=leads, mostramos la tabla de leads (pestaña nueva).
+  const view = new URLSearchParams(location.search).get("view");
+  if (view === "leads") return <LeadsPage />;
 
   return (
     <>
       <div style={switcher}>
         <button
-          onClick={() => setView("panel3d")}
-          style={{ ...tab, ...(view === "panel3d" ? tabActive : {}) }}
+          onClick={() => window.open(`${location.pathname}?view=leads`, "_blank")}
+          style={tab}
+          title="Abrir la tabla de leads en una pestaña nueva"
         >
-          🎮 Panel 3D
-        </button>
-        <button
-          onClick={() => setView("seguros")}
-          style={{ ...tab, ...(view === "seguros" ? tabActive : {}) }}
-        >
-          🚗 Gestión Seguros
+          📋 Abrir Leads
         </button>
         <button
           onClick={() => { clearToken(); location.reload(); }}
@@ -93,8 +104,7 @@ function Root() {
           ⎋
         </button>
       </div>
-
-      {view === "panel3d" ? <App /> : <AppSeguros />}
+      <App />
     </>
   );
 }
@@ -126,7 +136,6 @@ const tab: React.CSSProperties = {
   padding: "6px 14px", borderRadius: 7, border: "none", background: "transparent",
   color: "#8b949e", fontSize: 13, fontWeight: 700, cursor: "pointer",
 };
-const tabActive: React.CSSProperties = { background: "#1f6feb", color: "#fff" };
 
 ReactDOM.createRoot(document.getElementById("root")!).render(
   <React.StrictMode>
