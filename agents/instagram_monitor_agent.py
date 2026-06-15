@@ -307,78 +307,100 @@ def _procesar_comentarios(cl) -> int:
 
 # ── 2) Responder DMs entrantes (conversación con Groq) ────────────────────────
 
+def _procesar_thread(cl, db, th, es_pending: bool) -> bool:
+    """Procesa un hilo de DM (principal o solicitud). Devuelve True si respondió."""
+    otros = [u for u in th.users]
+    if not otros:
+        return False
+    username = otros[0].username
+    nombre = getattr(otros[0], "full_name", "") or username
+
+    # En las solicitudes (pending) los mensajes vienen en el propio thread.
+    if es_pending:
+        mensajes = getattr(th, "messages", None) or []
+    else:
+        mensajes = cl.direct_messages(th.id, amount=5)
+    if not mensajes:
+        return False
+    ultimo = mensajes[0]
+    if str(ultimo.user_id) == str(cl.user_id):
+        return False  # el último mensaje es nuestro: esperamos respuesta
+
+    texto_usuario = (ultimo.text or "").strip()
+    if not texto_usuario:
+        return False
+
+    lead = db.query(Lead).filter(Lead.usuario_instagram == username).first()
+    if not lead:
+        # Alguien nuevo escribiendo por DM: capturar solo si menciona la keyword.
+        if not detect_trigger_keyword(texto_usuario):
+            return False
+        lead = _get_or_create_lead(db, username, nombre, texto_usuario)
+        origen = "solicitud" if es_pending else "DM"
+        _log(f"🎯 Lead nuevo por {origen}: @{username} — '{texto_usuario[:40]}'")
+
+    # Si es una solicitud de mensaje, aprobarla para poder responder.
+    if es_pending:
+        try:
+            cl.direct_pending_approve(th.id)
+        except Exception as e:
+            _log(f"No se pudo aprobar la solicitud de @{username}: {e}")
+
+    # Reconstruir historial desde la DB
+    convs = db.query(Conversacion).filter(
+        Conversacion.lead_id == lead.id
+    ).order_by(Conversacion.fecha.asc()).all()
+    historial = []
+    for cv in convs:
+        if cv.mensaje_usuario:
+            historial.append(f"Usuario: {cv.mensaje_usuario}")
+        if cv.mensaje_respuesta:
+            historial.append(f"Asesor: {cv.mensaje_respuesta}")
+    historial.append(f"Usuario: {texto_usuario}")
+
+    respuesta = _generar_mensaje(historial)
+    cl.direct_send(respuesta, thread_ids=[th.id])
+    _guardar_conversacion(db, lead.id, mensaje_usuario=texto_usuario, mensaje_respuesta=respuesta)
+
+    if lead.estado == "nuevo":
+        lead.estado = "interesado"
+        db.add(lead)
+        db.commit()
+    return True
+
+
 def _procesar_dms(cl) -> int:
     """
-    Lee DMs entrantes y los responde con Groq. Devuelve mensajes respondidos.
+    Lee DMs entrantes (bandeja principal + solicitudes de mensaje) y los
+    responde con Groq. Devuelve la cantidad de mensajes respondidos.
     - Si el remitente ya es lead: continúa la conversación.
-    - Si es alguien nuevo y su mensaje menciona una keyword ("quiero"...): lo
-      captura como lead y arranca la conversación.
+    - Si es alguien nuevo y menciona una keyword ("quiero"...): lo captura
+      como lead y arranca la conversación (aprobando la solicitud si hace falta).
     """
     respondidos = 0
     db = SessionLocal()
     try:
         enviados_hoy = _dms_enviados_hoy(db)
         try:
-            threads = _with_retry(cl.direct_threads, amount=20)
+            principal = _with_retry(cl.direct_threads, amount=20)
         except Exception as e:
             _log(f"No se pudieron leer los DMs: {e}")
-            return 0
+            principal = []
+        try:
+            pending = _with_retry(cl.direct_pending_inbox, amount=20)
+        except Exception as e:
+            _log(f"No se pudieron leer las solicitudes de mensaje: {e}")
+            pending = []
 
-        for th in threads:
+        todos = [(t, False) for t in principal] + [(t, True) for t in pending]
+        for th, es_pending in todos:
             if enviados_hoy + respondidos >= IG_MAX_DM_PER_DAY:
                 _log(f"🛑 Tope diario de DMs alcanzado ({IG_MAX_DM_PER_DAY}). Se omiten respuestas restantes.")
                 break
             try:
-                otros = [u for u in th.users]
-                if not otros:
-                    continue
-                username = otros[0].username
-                nombre = getattr(otros[0], "full_name", "") or username
-
-                mensajes = cl.direct_messages(th.id, amount=5)
-                # El más reciente debe ser del usuario (no nuestro)
-                if not mensajes:
-                    continue
-                ultimo = mensajes[0]
-                if str(ultimo.user_id) == str(cl.user_id):
-                    continue  # el último mensaje es nuestro: esperamos respuesta
-
-                texto_usuario = (ultimo.text or "").strip()
-                if not texto_usuario:
-                    continue
-
-                lead = db.query(Lead).filter(Lead.usuario_instagram == username).first()
-                if not lead:
-                    # Lead nuevo que escribe directo por DM: capturar solo si menciona la keyword.
-                    if not detect_trigger_keyword(texto_usuario):
-                        continue
-                    lead = _get_or_create_lead(db, username, nombre, texto_usuario)
-                    _log(f"🎯 Lead nuevo por DM: @{username} — '{texto_usuario[:40]}'")
-
-                # Reconstruir historial desde la DB
-                convs = db.query(Conversacion).filter(
-                    Conversacion.lead_id == lead.id
-                ).order_by(Conversacion.fecha.asc()).all()
-                historial = []
-                for cv in convs:
-                    if cv.mensaje_usuario:
-                        historial.append(f"Usuario: {cv.mensaje_usuario}")
-                    if cv.mensaje_respuesta:
-                        historial.append(f"Asesor: {cv.mensaje_respuesta}")
-                historial.append(f"Usuario: {texto_usuario}")
-
-                respuesta = _generar_mensaje(historial)
-                cl.direct_send(respuesta, thread_ids=[th.id])
-                _guardar_conversacion(db, lead.id, mensaje_usuario=texto_usuario, mensaje_respuesta=respuesta)
-
-                # Marcar como interesado al primer ida y vuelta
-                if lead.estado == "nuevo":
-                    lead.estado = "interesado"
-                    db.add(lead)
-                    db.commit()
-
-                respondidos += 1
-                _human_delay(3, 7)
+                if _procesar_thread(cl, db, th, es_pending):
+                    respondidos += 1
+                    _human_delay(3, 7)
             except Exception as e:
                 _log(f"Error procesando un DM: {e}")
                 continue
