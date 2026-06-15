@@ -9,6 +9,7 @@ leads / cotizaciones / conversaciones / estadísticas.
 
 import asyncio
 import json
+import os
 import sys
 from contextlib import asynccontextmanager
 from pathlib import Path
@@ -40,6 +41,24 @@ _AGENTS: dict = {
 }
 _AGENT_TASKS: dict[str, Optional[asyncio.Task]] = {"instagram": None, "leads": None}
 
+# Monitoreo automático del agente de Instagram (sin disparo manual)
+IG_MONITOR_ENABLED  = os.getenv("IG_MONITOR_ENABLED", "true").lower() in ("1", "true", "yes")
+IG_MONITOR_INTERVAL = int(os.getenv("IG_MONITOR_INTERVAL", "600"))  # segundos (default 10 min)
+
+
+async def _scheduler_loop():
+    """Ejecuta el ciclo del agente de Instagram periódicamente, en segundo plano."""
+    await asyncio.sleep(30)  # esperar a que el server termine de arrancar
+    while True:
+        try:
+            if _AGENTS["instagram"]["status"] != "running":
+                await _run_instagram_agent()
+        except asyncio.CancelledError:
+            break
+        except Exception as e:
+            print(f"[Scheduler] Error en ciclo automático: {e}")
+        await asyncio.sleep(IG_MONITOR_INTERVAL)
+
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -49,7 +68,16 @@ async def lifespan(app: FastAPI):
     except Exception as e:
         print(f"[Startup] No se pudieron crear/verificar tablas: {e}")
     bus.set_loop(asyncio.get_event_loop())
+
+    scheduler_task = None
+    if IG_MONITOR_ENABLED:
+        scheduler_task = asyncio.create_task(_scheduler_loop())
+        print(f"[Scheduler] Monitoreo automático de Instagram activado (cada {IG_MONITOR_INTERVAL}s)")
+
     yield
+
+    if scheduler_task:
+        scheduler_task.cancel()
 
 
 app = FastAPI(title="BBVA Seguros API", lifespan=lifespan)

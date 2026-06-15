@@ -181,7 +181,8 @@ def _procesar_comentarios(cl) -> int:
             for media in medias:
                 try:
                     comentarios = cl.media_comments(media.id, amount=50)
-                except Exception:
+                except Exception as e:
+                    _log(f"No se pudieron leer comentarios del post {media.id}: {e}")
                     continue
 
                 for c in comentarios:

@@ -16,6 +16,8 @@ services:
       INSTAGRAM_ACCOUNTS: ${INSTAGRAM_ACCOUNTS}
       IG_SESSION_FILE: /app/data/ig_session.json
       IG_POSTS_TO_CHECK: ${IG_POSTS_TO_CHECK:-5}
+      IG_MONITOR_ENABLED: ${IG_MONITOR_ENABLED:-true}
+      IG_MONITOR_INTERVAL: ${IG_MONITOR_INTERVAL:-600}
       HOST: 0.0.0.0
       PORT: 8000
     ports:
