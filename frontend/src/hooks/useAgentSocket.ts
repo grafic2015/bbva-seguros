@@ -1,6 +1,7 @@
 import { useEffect } from "react";
 import { useStore } from "../store";
 import type { WSEvent } from "../types";
+import { getToken } from "../auth";
 
 // Request notification permission
 if ("Notification" in window && Notification.permission === "default") {
@@ -28,7 +29,10 @@ export function useAgentSocket() {
     if (apiUrlForWs) {
       defaultWsUrl = apiUrlForWs.replace(/^http/, 'ws') + '/ws';
     }
-    const url = import.meta.env.VITE_WS_URL || defaultWsUrl;
+    let url = import.meta.env.VITE_WS_URL || defaultWsUrl;
+    // Adjuntar el token de auth (el WS no puede usar headers)
+    const token = getToken();
+    if (token) url += (url.includes("?") ? "&" : "?") + "token=" + encodeURIComponent(token);
     let ws: WebSocket | null = null;
     let retry = 0;
     let stopped = false;

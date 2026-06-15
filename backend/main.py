@@ -97,6 +97,40 @@ app.include_router(stats_router)
 app.include_router(webhook_router)
 
 
+# ── Autenticación ────────────────────────────────────────────────────────────────
+
+from backend import auth as _auth
+
+
+@app.middleware("http")
+async def auth_middleware(request: Request, call_next):
+    # Dejar pasar preflight CORS y, si la auth está desactivada, todo.
+    if not _auth.AUTH_ENABLED or request.method == "OPTIONS":
+        return await call_next(request)
+    path = request.url.path
+    if path in _auth.PUBLIC_PATHS or path.startswith("/docs"):
+        return await call_next(request)
+    header = request.headers.get("Authorization", "")
+    token = header[7:] if header.startswith("Bearer ") else ""
+    if not _auth.is_valid_token(token):
+        return JSONResponse({"detail": "No autorizado"}, status_code=401)
+    return await call_next(request)
+
+
+@app.post("/api/login")
+async def api_login(request: Request):
+    """Valida la contraseña y devuelve el token de acceso."""
+    try:
+        data = await request.json()
+    except Exception:
+        data = {}
+    if not _auth.AUTH_ENABLED:
+        return {"ok": True, "token": "", "auth_disabled": True}
+    if _auth.check_password(data.get("password", "")):
+        return {"ok": True, "token": _auth.VALID_TOKEN}
+    return JSONResponse({"ok": False, "detail": "Contraseña incorrecta"}, status_code=401)
+
+
 # ── Endpoints básicos ────────────────────────────────────────────────────────────
 
 @app.get("/")
@@ -106,7 +140,7 @@ def root():
 
 @app.get("/api/health")
 def api_health():
-    return {"ok": True, "status": "healthy"}
+    return {"ok": True, "status": "healthy", "auth": _auth.AUTH_ENABLED}
 
 
 @app.get("/api/settings")
@@ -154,7 +188,11 @@ async def api_update_lead_status(username: str, request: Request):
 # ── WebSocket ──────────────────────────────────────────────────────────────────
 
 @app.websocket("/ws")
-async def websocket_endpoint(ws: WebSocket):
+async def websocket_endpoint(ws: WebSocket, token: str = ""):
+    # El middleware HTTP no cubre WebSockets: validamos el token por query param.
+    if _auth.AUTH_ENABLED and not _auth.is_valid_token(token):
+        await ws.close(code=1008)  # Policy Violation
+        return
     await ws.accept()
     # Enviar snapshot inicial del estado de los agentes
     await ws.send_text(json.dumps({"type": "snapshot", "agents": _AGENTS}))
