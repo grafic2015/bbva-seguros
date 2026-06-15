@@ -62,6 +62,15 @@ export function LeadsView() {
     } catch {}
   };
 
+  const handleDelete = async (lead: Lead) => {
+    if (!lead.id) return;
+    if (!confirm(`¿Eliminar el lead @${lead.usuario}? Esta acción no se puede deshacer.`)) return;
+    setLeads((prev) => prev.filter((l) => l.id !== lead.id));
+    try {
+      await fetch(`${API}/api/leads/${lead.id}`, { method: "DELETE" });
+    } catch {}
+  };
+
   const exportCSV = () => {
     if (!leads.length) return;
     const headers = ["Usuario", "Nombre", "Estado", "Comentario", "DM Enviado", "Fecha Contacto", "Teléfono", "Email"];
@@ -156,6 +165,7 @@ export function LeadsView() {
                   <th style={styles.th}>Fecha</th>
                   <th style={styles.th}>Contacto</th>
                   <th style={styles.th}>Gestionar</th>
+                  <th style={styles.th}>Eliminar</th>
                 </tr>
               </thead>
               <tbody>
@@ -208,6 +218,15 @@ export function LeadsView() {
                           ))}
                         </select>
                       </td>
+                      <td style={{ ...styles.td, textAlign: "center" }}>
+                        <button
+                          onClick={() => handleDelete(lead)}
+                          style={styles.deleteBtn}
+                          title="Eliminar lead"
+                        >
+                          🗑
+                        </button>
+                      </td>
                     </tr>
                   );
                 })}
@@ -221,50 +240,54 @@ export function LeadsView() {
 }
 
 const styles: Record<string, React.CSSProperties> = {
-  page: { minHeight: "100vh", background: "#0d1117", padding: 20, display: "flex", justifyContent: "center" },
+  page: { minHeight: "100vh", background: "#0d1117", padding: 24, display: "flex", justifyContent: "center" },
   card: {
-    width: "min(1100px, 100%)", maxHeight: "calc(100vh - 40px)", display: "flex", flexDirection: "column",
-    background: "#161b22", border: "1px solid #30363d", borderRadius: 14,
+    width: "min(1700px, 100%)", maxHeight: "calc(100vh - 48px)", display: "flex", flexDirection: "column",
+    background: "#161b22", border: "1px solid #30363d", borderRadius: 16,
     boxShadow: "0 24px 80px #000c", overflow: "hidden", color: "#e6edf3",
   },
   header: {
     display: "flex", alignItems: "center", justifyContent: "space-between",
-    padding: "16px 20px", borderBottom: "1px solid #30363d",
+    padding: "22px 28px", borderBottom: "1px solid #30363d",
     background: "linear-gradient(135deg, #161b22, #0d1117)",
   },
-  title: { margin: 0, fontSize: 20, fontWeight: 700 },
-  subtitle: { fontSize: 12, color: "#8b949e", marginTop: 3 },
+  title: { margin: 0, fontSize: 30, fontWeight: 700 },
+  subtitle: { fontSize: 17, color: "#8b949e", marginTop: 5 },
   searchInput: {
-    padding: "7px 14px", borderRadius: 8, border: "1px solid #30363d",
-    background: "#0d1117", color: "#e6edf3", fontSize: 13, width: 220, outline: "none",
+    padding: "12px 18px", borderRadius: 10, border: "1px solid #30363d",
+    background: "#0d1117", color: "#e6edf3", fontSize: 17, width: 300, outline: "none",
   },
   exportBtn: {
     background: "#1a472a", color: "#3fb950", border: "1px solid #3fb95044",
-    padding: "7px 14px", borderRadius: 8, cursor: "pointer", fontWeight: 700, fontSize: 12,
+    padding: "12px 20px", borderRadius: 10, cursor: "pointer", fontWeight: 700, fontSize: 16,
   },
   statsBar: {
-    display: "flex", gap: 8, flexWrap: "wrap",
-    padding: "10px 16px", borderBottom: "1px solid #30363d", background: "#0d1117",
+    display: "flex", gap: 10, flexWrap: "wrap",
+    padding: "14px 24px", borderBottom: "1px solid #30363d", background: "#0d1117",
   },
   statChip: {
-    display: "flex", alignItems: "center", gap: 6,
-    padding: "5px 12px", borderRadius: 20, cursor: "pointer", fontSize: 12, fontWeight: 600,
+    display: "flex", alignItems: "center", gap: 8,
+    padding: "9px 18px", borderRadius: 22, cursor: "pointer", fontSize: 16, fontWeight: 600,
   },
-  chipCount: { fontSize: 11, fontWeight: 700, padding: "1px 7px", borderRadius: 10 },
+  chipCount: { fontSize: 15, fontWeight: 700, padding: "2px 10px", borderRadius: 12 },
   tableWrap: { overflow: "auto", flex: 1 },
-  table: { width: "100%", borderCollapse: "collapse", fontSize: 13 },
+  table: { width: "100%", borderCollapse: "collapse", fontSize: 17 },
   th: {
     position: "sticky", top: 0, background: "#0d1117", textAlign: "left",
-    padding: "10px 14px", color: "#8b949e", fontWeight: 600, fontSize: 11,
+    padding: "16px 20px", color: "#8b949e", fontWeight: 600, fontSize: 14,
     textTransform: "uppercase", borderBottom: "1px solid #30363d", whiteSpace: "nowrap",
   },
-  td: { padding: "9px 14px", borderBottom: "1px solid #21262d", verticalAlign: "middle" },
-  badge: { fontSize: 11, padding: "3px 10px", borderRadius: 12, fontWeight: 700, whiteSpace: "nowrap" },
+  td: { padding: "16px 20px", borderBottom: "1px solid #21262d", verticalAlign: "middle", fontSize: 17 },
+  badge: { fontSize: 15, padding: "5px 14px", borderRadius: 14, fontWeight: 700, whiteSpace: "nowrap" },
   igLink: { color: "#e1306c", textDecoration: "none", fontWeight: 700 },
-  contactLink: { textDecoration: "none", fontSize: 16 },
+  contactLink: { textDecoration: "none", fontSize: 22 },
   select: {
     background: "#21262d", border: "1px solid #30363d",
-    borderRadius: 6, padding: "3px 6px", fontSize: 11, cursor: "pointer", fontWeight: 600,
+    borderRadius: 8, padding: "8px 10px", fontSize: 15, cursor: "pointer", fontWeight: 600,
   },
-  empty: { padding: 60, textAlign: "center", color: "#8b949e", fontSize: 14 },
+  deleteBtn: {
+    background: "#3a1f1f", border: "1px solid #f8514944", color: "#f85149",
+    borderRadius: 8, padding: "8px 14px", fontSize: 18, cursor: "pointer",
+  },
+  empty: { padding: 80, textAlign: "center", color: "#8b949e", fontSize: 18 },
 };

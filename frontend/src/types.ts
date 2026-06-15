@@ -22,6 +22,7 @@ export type AgentsState = Record<AgentId, AgentState>;
 
 /** Un lead de seguros automotrices gestionado por los agentes. */
 export interface Lead {
+  id?: number;
   usuario: string;
   nombre?: string;
   comentario?: string;
