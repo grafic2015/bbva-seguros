@@ -6,7 +6,6 @@ export function ControlPanel() {
   const agents      = useStore((s) => s.agents);
   const connected   = useStore((s) => s.connected);
   const leads       = useStore((s) => s.leads);
-  const setShowResults = useStore((s) => s.setShowResults);
 
   // Estadísticas calculadas desde los leads
   const stats = {
@@ -80,7 +79,7 @@ export function ControlPanel() {
       <button
         id="btn-ver-leads"
         style={styles.bigBtn}
-        onClick={() => setShowResults(true)}
+        onClick={() => window.open(`${location.origin}${location.pathname}?view=leads`, "_blank")}
       >
         📋 Ver tabla de Leads
       </button>
