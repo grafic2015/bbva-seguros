@@ -28,6 +28,11 @@ IG_SESSION_FILE     = os.getenv("IG_SESSION_FILE", "/app/data/ig_session.json")
 IG_POSTS_TO_CHECK   = int(os.getenv("IG_POSTS_TO_CHECK", "5"))
 # Clave secreta TOTP (Google Authenticator) para re-login automático ante 2FA
 IG_TOTP_SEED        = os.getenv("IG_TOTP_SEED", "").replace(" ", "")
+
+# Límites anti-ban
+IG_MAX_DM_PER_DAY    = int(os.getenv("IG_MAX_DM_PER_DAY", "40"))     # tope de DMs por día
+IG_MAX_NEW_PER_CYCLE = int(os.getenv("IG_MAX_NEW_PER_CYCLE", "5"))   # leads nuevos por ciclo
+IG_ACTIVE_HOURS      = os.getenv("IG_ACTIVE_HOURS", "8-23")          # horario activo (hora del server)
 LEADS_FILE          = "leads_instagram.json"  # obsoleto, conservado por compatibilidad
 
 # ── Groq IA ───────────────────────────────────────────────────────────────────

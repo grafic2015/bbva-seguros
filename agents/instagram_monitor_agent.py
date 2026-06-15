@@ -32,6 +32,9 @@ from config import (
     IG_SESSION_FILE,
     IG_POSTS_TO_CHECK,
     IG_TOTP_SEED,
+    IG_MAX_DM_PER_DAY,
+    IG_MAX_NEW_PER_CYCLE,
+    IG_ACTIVE_HOURS,
 )
 from backend.models import SessionLocal, Lead, Conversacion
 
@@ -54,6 +57,24 @@ def detect_trigger_keyword(text: str) -> bool:
 def _human_delay(a: float = 2.0, b: float = 6.0) -> None:
     """Pausa aleatoria para imitar comportamiento humano y reducir el riesgo de ban."""
     time.sleep(random.uniform(a, b))
+
+
+def _en_horario() -> bool:
+    """¿Estamos dentro del horario activo configurado? (evita operar de madrugada)."""
+    try:
+        ini, fin = IG_ACTIVE_HOURS.split("-")
+        return int(ini) <= datetime.now().hour < int(fin)
+    except Exception:
+        return True
+
+
+def _dms_enviados_hoy(db) -> int:
+    """Cuenta los DMs (conversaciones) registrados hoy, para respetar el tope diario."""
+    inicio = datetime.utcnow().replace(hour=0, minute=0, second=0, microsecond=0)
+    return db.query(Conversacion).filter(
+        Conversacion.tipo == "dm_instagram",
+        Conversacion.fecha >= inicio,
+    ).count()
 
 
 def _is_rate_limit(e: Exception) -> bool:
@@ -204,6 +225,11 @@ def _procesar_comentarios(cl) -> int:
     nuevos = 0
     db = SessionLocal()
     try:
+        enviados_hoy = _dms_enviados_hoy(db)
+        if enviados_hoy >= IG_MAX_DM_PER_DAY:
+            _log(f"🛑 Tope diario de DMs alcanzado ({enviados_hoy}/{IG_MAX_DM_PER_DAY}). No se procesan comentarios.")
+            return 0
+
         for cuenta in INSTAGRAM_ACCOUNTS:
             cuenta = cuenta.strip().lstrip("@")
             if not cuenta:
@@ -223,6 +249,14 @@ def _procesar_comentarios(cl) -> int:
                     continue
 
                 for c in comentarios:
+                    # Límites anti-ban: tope por ciclo y tope diario
+                    if nuevos >= IG_MAX_NEW_PER_CYCLE:
+                        _log(f"⏸️ Tope de leads por ciclo alcanzado ({IG_MAX_NEW_PER_CYCLE}). Continúa en el próximo ciclo.")
+                        return nuevos
+                    if enviados_hoy + nuevos >= IG_MAX_DM_PER_DAY:
+                        _log(f"🛑 Tope diario de DMs alcanzado ({IG_MAX_DM_PER_DAY}).")
+                        return nuevos
+
                     if not detect_trigger_keyword(c.text):
                         continue
                     autor = c.user.username
@@ -268,6 +302,7 @@ def _procesar_dms(cl) -> int:
     respondidos = 0
     db = SessionLocal()
     try:
+        enviados_hoy = _dms_enviados_hoy(db)
         try:
             threads = _with_retry(cl.direct_threads, amount=20)
         except Exception as e:
@@ -275,6 +310,9 @@ def _procesar_dms(cl) -> int:
             return 0
 
         for th in threads:
+            if enviados_hoy + respondidos >= IG_MAX_DM_PER_DAY:
+                _log(f"🛑 Tope diario de DMs alcanzado ({IG_MAX_DM_PER_DAY}). Se omiten respuestas restantes.")
+                break
             try:
                 otros = [u for u in th.users]
                 if not otros:
@@ -337,6 +375,10 @@ def monitor_instagram() -> int:
     """
     if not INSTAGRAM_USERNAME or not INSTAGRAM_PASSWORD:
         _log("⚠️  Falta configurar INSTAGRAM_USERNAME y INSTAGRAM_PASSWORD")
+        return 0
+
+    if not _en_horario():
+        _log(f"😴 Fuera del horario activo ({IG_ACTIVE_HOURS}). Se omite el ciclo.")
         return 0
 
     _log("📸 Iniciando ciclo de monitoreo...")
