@@ -32,7 +32,8 @@ IG_TOTP_SEED        = os.getenv("IG_TOTP_SEED", "").replace(" ", "")
 # Límites anti-ban
 IG_MAX_DM_PER_DAY    = int(os.getenv("IG_MAX_DM_PER_DAY", "40"))     # tope de DMs por día
 IG_MAX_NEW_PER_CYCLE = int(os.getenv("IG_MAX_NEW_PER_CYCLE", "5"))   # leads nuevos por ciclo
-IG_ACTIVE_HOURS      = os.getenv("IG_ACTIVE_HOURS", "8-23")          # horario activo (hora del server)
+IG_ACTIVE_HOURS      = os.getenv("IG_ACTIVE_HOURS", "8-23")          # horario activo (en IG_TIMEZONE)
+IG_TIMEZONE          = os.getenv("IG_TIMEZONE", "America/Argentina/Buenos_Aires")
 LEADS_FILE          = "leads_instagram.json"  # obsoleto, conservado por compatibilidad
 
 # ── Groq IA ───────────────────────────────────────────────────────────────────

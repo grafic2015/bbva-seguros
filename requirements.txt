@@ -6,6 +6,9 @@ playwright>=1.44.0
 # Instagram (captura de leads vía login)
 instagrapi>=2.1.0
 
+# Zona horaria (para el horario activo del bot en imágenes slim)
+tzdata>=2024.1
+
 # Servidor web local
 flask>=3.0.0
 

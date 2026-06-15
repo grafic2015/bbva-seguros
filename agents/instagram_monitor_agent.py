@@ -35,6 +35,7 @@ from config import (
     IG_MAX_DM_PER_DAY,
     IG_MAX_NEW_PER_CYCLE,
     IG_ACTIVE_HOURS,
+    IG_TIMEZONE,
 )
 from backend.models import SessionLocal, Lead, Conversacion
 
@@ -60,10 +61,12 @@ def _human_delay(a: float = 2.0, b: float = 6.0) -> None:
 
 
 def _en_horario() -> bool:
-    """¿Estamos dentro del horario activo configurado? (evita operar de madrugada)."""
+    """¿Estamos dentro del horario activo configurado (en IG_TIMEZONE)? Evita operar de madrugada."""
     try:
+        from zoneinfo import ZoneInfo
+        hora = datetime.now(ZoneInfo(IG_TIMEZONE)).hour
         ini, fin = IG_ACTIVE_HOURS.split("-")
-        return int(ini) <= datetime.now().hour < int(fin)
+        return int(ini) <= hora < int(fin)
     except Exception:
         return True
 
