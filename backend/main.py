@@ -1,6 +1,10 @@
 """
-Backend FastAPI — puerto 8000
-BBVA Seguros: REST + WebSockets en tiempo real para la escena 3D.
+Backend FastAPI unificado — puerto 8000
+BBVA Seguros: REST + WebSockets en tiempo real.
+
+Fuente de verdad ÚNICA: la base de datos (Supabase).
+Sirve tanto el panel 3D (WebSocket + agentes) como la gestión de
+leads / cotizaciones / conversaciones / estadísticas.
 """
 
 import asyncio
@@ -18,6 +22,14 @@ sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
 import config
 from backend.events import bus
+from backend.models import crear_tablas
+from backend.routers import (
+    leads_router,
+    cotizaciones_router,
+    conversaciones_router,
+    stats_router,
+    webhook_router,
+)
 
 ROOT = Path(__file__).resolve().parent.parent
 
@@ -31,11 +43,16 @@ _AGENT_TASKS: dict[str, Optional[asyncio.Task]] = {"instagram": None, "leads": N
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
+    # Asegurar que las tablas existan en la base de datos
+    try:
+        crear_tablas()
+    except Exception as e:
+        print(f"[Startup] No se pudieron crear/verificar tablas: {e}")
     bus.set_loop(asyncio.get_event_loop())
     yield
 
 
-app = FastAPI(lifespan=lifespan)
+app = FastAPI(title="BBVA Seguros API", lifespan=lifespan)
 
 app.add_middleware(
     CORSMiddleware,
@@ -44,8 +61,20 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+# ── Routers de la base de datos ──────────────────────────────────────────────────
+app.include_router(leads_router)
+app.include_router(cotizaciones_router)
+app.include_router(conversaciones_router)
+app.include_router(stats_router)
+app.include_router(webhook_router)
 
-# ── Endpoints REST ─────────────────────────────────────────────────────────────
+
+# ── Endpoints básicos ────────────────────────────────────────────────────────────
+
+@app.get("/")
+def root():
+    return {"app": "BBVA Seguros API", "docs": "/docs", "redoc": "/redoc"}
+
 
 @app.get("/api/health")
 def api_health():
@@ -56,8 +85,8 @@ def api_health():
 def api_get_settings():
     config.load_settings()
     return {
-        "EMAIL_ADDRESS": config.EMAIL_ADDRESS,
-        "CV_FILE_PATH":  config.CV_FILE_PATH,
+        "EMAIL_ADDRESS": config.EMAIL_ADDRESS if hasattr(config, "EMAIL_ADDRESS") else "",
+        "INSTAGRAM_ACCOUNTS": config.INSTAGRAM_ACCOUNTS,
     }
 
 
@@ -75,86 +104,21 @@ async def api_save_settings(request: Request):
     return {"ok": True}
 
 
-@app.post("/api/instagram/monitor")
-async def api_instagram_monitor():
-    try:
-        from agents.instagram_monitor_agent import monitor_instagram
-        n = monitor_instagram()
-        return {"ok": True, "new_leads": n}
-    except Exception as e:
-        return JSONResponse({"ok": False, "error": str(e)}, status_code=500)
-
-
-@app.get("/api/instagram/leads")
-async def api_instagram_leads():
-    try:
-        from agents.instagram_monitor_agent import get_leads_summary
-        summary = get_leads_summary()
-        return summary
-    except Exception as e:
-        return JSONResponse({"ok": False, "error": str(e)}, status_code=500)
-
-
-@app.get("/api/leads/summary")
-async def api_leads_summary():
-    try:
-        from agents.leads_manager_agent import get_leads_summary
-        summary = get_leads_summary()
-        return summary
-    except Exception as e:
-        return JSONResponse({"ok": False, "error": str(e)}, status_code=500)
-
-
-@app.get("/api/leads/all")
-async def api_leads_all():
-    try:
-        from agents.leads_manager_agent import get_all_leads
-        leads = get_all_leads()
-        return {"leads": leads}
-    except Exception as e:
-        return JSONResponse({"ok": False, "error": str(e)}, status_code=500)
-
-
-@app.get("/api/leads/hot")
-async def api_leads_hot():
-    try:
-        from agents.leads_manager_agent import get_hot_leads
-        leads = get_hot_leads()
-        return {"hot_leads": leads}
-    except Exception as e:
-        return JSONResponse({"ok": False, "error": str(e)}, status_code=500)
-
+# ── Actualización de estado por usuario (consumido por el panel 3D) ──────────────
 
 @app.post("/api/leads/{username}/status")
 async def api_update_lead_status(username: str, request: Request):
+    """Actualiza el estado de un lead identificándolo por usuario de Instagram."""
     try:
         data = await request.json()
-        new_status = data.get("status")
+        new_status = data.get("estado") or data.get("status")
         from agents.leads_manager_agent import update_lead_status
         success = update_lead_status(username, new_status)
+        if success:
+            # Notificar a los clientes conectados con la lista actualizada
+            from agents.leads_manager_agent import get_all_leads
+            bus.publish({"type": "results", "leads": get_all_leads()})
         return {"ok": success}
-    except Exception as e:
-        return JSONResponse({"ok": False, "error": str(e)}, status_code=500)
-
-
-@app.post("/api/leads/{username}/note")
-async def api_add_note_to_lead(username: str, request: Request):
-    try:
-        data = await request.json()
-        note = data.get("note")
-        from agents.leads_manager_agent import add_note_to_lead
-        success = add_note_to_lead(username, note)
-        return {"ok": success}
-    except Exception as e:
-        return JSONResponse({"ok": False, "error": str(e)}, status_code=500)
-
-
-@app.get("/api/leads/export/csv")
-async def api_export_leads_csv():
-    try:
-        from agents.leads_manager_agent import export_leads_csv
-        csv_content = export_leads_csv()
-        return {"ok": True, "csv": csv_content}
     except Exception as e:
         return JSONResponse({"ok": False, "error": str(e)}, status_code=500)
 
@@ -169,31 +133,31 @@ async def websocket_endpoint(ws: WebSocket):
     q = await bus.subscribe()
     try:
         while True:
-            event = await asyncio.wait_for(q.get(), timeout=30)
-            await ws.send_text(json.dumps(event))
-    except asyncio.TimeoutError:
-        # Mantener viva la conexión con un ping
-        try:
-            await ws.send_text(json.dumps({"type": "ping"}))
-        except Exception:
-            pass
+            try:
+                event = await asyncio.wait_for(q.get(), timeout=30)
+                await ws.send_text(json.dumps(event))
+            except asyncio.TimeoutError:
+                # Mantener viva la conexión con un ping
+                await ws.send_text(json.dumps({"type": "ping"}))
     except WebSocketDisconnect:
+        pass
+    except Exception:
         pass
     finally:
         bus.unsubscribe(q)
 
 
-# ── /api/status ─────────────────────────────────────────────────────────────────
+# ── /api/status: snapshot inicial para el panel 3D ───────────────────────────────
 
 @app.get("/api/status")
 async def api_status():
-    """Snapshot de leads + estado de agentes para la carga inicial del frontend."""
+    """Snapshot de leads (desde la DB) + estado de agentes para la carga inicial."""
     try:
         from agents.leads_manager_agent import get_all_leads
         leads = get_all_leads()
     except Exception:
         leads = []
-    return {"leads": leads, "agents": _AGENTS}
+    return {"ok": True, "status": "running", "leads": leads, "agents": _AGENTS}
 
 
 # ── Control de Agentes ──────────────────────────────────────────────────────────
@@ -243,7 +207,7 @@ async def _run_leads_agent():
         _AGENTS["leads"]["total_leads"] = total
         _AGENTS["leads"]["status"]  = "done"
         _AGENTS["leads"]["mensaje"] = f"✅ {total} leads gestionados. Conversión: {summary.get('conversion_rate', 0)}%"
-        _agent_log("leads", f"📊 Resumen: {total} leads | Convertidos: {summary['by_status'].get('converted', 0)} | Tasa: {summary.get('conversion_rate', 0)}%")
+        _agent_log("leads", f"📊 Resumen: {total} leads | Convertidos: {summary['by_status'].get('convertido', 0)} | Tasa: {summary.get('conversion_rate', 0)}%")
         bus.publish({"type": "results", "leads": get_all_leads()})
     except Exception as e:
         _AGENTS["leads"]["status"]  = "error"

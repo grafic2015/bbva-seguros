@@ -26,9 +26,10 @@ export function useLeads() {
   const fetchLeads = async (filtro?: string) => {
     setLoading(true)
     try {
-      let url = '/api/leads/'
+      const base = import.meta.env.VITE_API_URL || ''
+      let url = `${base}/api/leads/`
       if (filtro && filtro !== 'todos') {
-        url = `/api/leads/estado/${filtro}`
+        url = `${base}/api/leads/estado/${filtro}`
       }
       const res = await fetch(url)
       if (!res.ok) throw new Error('Error al obtener leads')
