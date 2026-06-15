@@ -133,6 +133,19 @@ class Cotizacion(Base):
         return f"<Cotizacion lead_id={self.lead_id} ${self.prima_mensual}>"
 
 
+class ComentarioProcesado(Base):
+    """Registro de comentarios de Instagram ya respondidos (dedup por comentario)."""
+    __tablename__ = "comentarios_procesados"
+
+    id = Column(Integer, primary_key=True, index=True)
+    comment_pk = Column(String(64), unique=True, nullable=False, index=True)
+    usuario = Column(String(100), nullable=True)
+    fecha = Column(DateTime, default=datetime.utcnow)
+
+    def __repr__(self):
+        return f"<ComentarioProcesado {self.comment_pk} - {self.usuario}>"
+
+
 def crear_tablas():
     """Crear todas las tablas en la base de datos"""
     Base.metadata.create_all(bind=engine)

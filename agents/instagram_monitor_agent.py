@@ -37,7 +37,7 @@ from config import (
     IG_ACTIVE_HOURS,
     IG_TIMEZONE,
 )
-from backend.models import SessionLocal, Lead, Conversacion
+from backend.models import SessionLocal, Lead, Conversacion, ComentarioProcesado
 
 # Cliente global reutilizable (se loguea una sola vez por proceso)
 _client = None
@@ -266,8 +266,12 @@ def _procesar_comentarios(cl) -> int:
                     # Saltar comentarios de la propia cuenta
                     if autor.lower() == cuenta.lower():
                         continue
-                    # Dedup: si ya es lead, no re-procesar
-                    if db.query(Lead).filter(Lead.usuario_instagram == autor).first():
+                    # Dedup POR COMENTARIO: si este comentario ya se respondió, saltarlo.
+                    # (Si el usuario borra y vuelve a comentar, es un comentario nuevo y se procesa de nuevo.)
+                    comment_pk = str(c.pk)
+                    if db.query(ComentarioProcesado).filter(
+                        ComentarioProcesado.comment_pk == comment_pk
+                    ).first():
                         continue
 
                     nombre = getattr(c.user, "full_name", "") or autor
@@ -279,9 +283,12 @@ def _procesar_comentarios(cl) -> int:
                                          replied_to_comment_id=c.pk)
                     except Exception as e:
                         _log(f"No se pudo responder el comentario de @{autor}: {e}")
+                    # Marcar el comentario como procesado para no responderlo dos veces
+                    db.add(ComentarioProcesado(comment_pk=comment_pk, usuario=autor))
+                    db.commit()
                     _human_delay()
 
-                    # b) Crear el lead en la DB
+                    # b) Crear el lead en la DB (no se duplica si ya existe)
                     lead = _get_or_create_lead(db, autor, nombre, c.text)
 
                     # c) Enviar DM inicial generado por Groq
