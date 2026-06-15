@@ -56,6 +56,28 @@ def _human_delay(a: float = 2.0, b: float = 6.0) -> None:
     time.sleep(random.uniform(a, b))
 
 
+def _is_rate_limit(e: Exception) -> bool:
+    msg = str(e).lower()
+    return any(s in msg for s in ("429", "wait a few", "throttl", "rate limit", "too many"))
+
+
+def _with_retry(fn, *args, retries: int = 2, base_wait: int = 45, **kwargs):
+    """
+    Ejecuta una llamada a la API reintentando ante rate limit (429) con backoff.
+    Espera base_wait, 2*base_wait, ... entre reintentos. Si no es rate limit, re-lanza.
+    """
+    for intento in range(retries + 1):
+        try:
+            return fn(*args, **kwargs)
+        except Exception as e:
+            if _is_rate_limit(e) and intento < retries:
+                wait = base_wait * (intento + 1)
+                _log(f"⏳ Rate limit (429): esperando {wait}s y reintentando ({intento + 1}/{retries})...")
+                time.sleep(wait)
+                continue
+            raise
+
+
 # ── Login con sesión persistente ─────────────────────────────────────────────
 
 def get_client():
@@ -187,15 +209,15 @@ def _procesar_comentarios(cl) -> int:
             if not cuenta:
                 continue
             try:
-                user_id = cl.user_id_from_username(cuenta)
-                medias = cl.user_medias(user_id, amount=IG_POSTS_TO_CHECK)
+                user_id = _with_retry(cl.user_id_from_username, cuenta)
+                medias = _with_retry(cl.user_medias, user_id, amount=IG_POSTS_TO_CHECK)
             except Exception as e:
                 _log(f"No se pudieron leer posts de @{cuenta}: {e}")
                 continue
 
             for media in medias:
                 try:
-                    comentarios = cl.media_comments(media.id, amount=50)
+                    comentarios = _with_retry(cl.media_comments, media.id, amount=50)
                 except Exception as e:
                     _log(f"No se pudieron leer comentarios del post {media.id}: {e}")
                     continue
@@ -247,7 +269,7 @@ def _procesar_dms(cl) -> int:
     db = SessionLocal()
     try:
         try:
-            threads = cl.direct_threads(amount=20)
+            threads = _with_retry(cl.direct_threads, amount=20)
         except Exception as e:
             _log(f"No se pudieron leer los DMs: {e}")
             return 0
